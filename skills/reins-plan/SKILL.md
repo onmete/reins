@@ -115,8 +115,11 @@ non-obvious).
 
 ## Open Questions
 
-- Anything that needs team input before implementation
-- Ambiguous AC flagged here (do NOT guess — ask)
+1. {question — what is unclear and what decision is needed}
+2. ...
+
+Number each question. Ambiguous AC go here (do NOT guess).
+Omit this section if there are no open questions.
 
 ## References
 
