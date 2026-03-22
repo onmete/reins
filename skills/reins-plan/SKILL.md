@@ -115,8 +115,8 @@ breakdown.
 ## Per-Criterion Plan
 
 ### AC 1: {criterion text}
-- **Approach:** what to do
-- **Location:** file:function or file:class
+- **Approach:** what to do and why
+- **Where:** file:function or file:class (no line numbers)
 - **Test:** how to verify
 
 ### AC 2: ...
@@ -148,7 +148,9 @@ Omit this section if there are no open questions.
   files. The only file you write is the plan itself.
 - **No implementation** — do not write code, tests, or
   configs. The plan describes what to do, not how the code
-  looks.
+  looks. No line numbers (they go stale), no code snippets
+  (the implementer will find a better way). Describe
+  behavior and intent, not syntax.
 - **Stay grounded** — only reference files and patterns that
   actually exist in the codebase. Do not invent modules or
   assume structure.
