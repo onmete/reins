@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-SDLC Demo: Plan → Implement → Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f12;
+  --surface: #1a1a22;
+  --surface2: #22222e;
+  --border: #2a2a3a;
+  --text: #e8e6f0;
+  --text-dim: #8b89a0;
+  --accent: #4a9eff;
+  --accent-glow: rgba(74, 158, 255, 0.15);
+  --green: #2ea043;
+  --green-glow: rgba(46, 160, 67, 0.15);
+  --red: #f85149;
+  --yellow: #d29922;
+  --jira-blue: #0052cc;
+  --jira-bg: #f4f5f7;
+  --jira-card: #ffffff;
+  --jira-text: #172b4d;
+  --jira-text-dim: #5e6c84;
+  --slack-bg: #1a1d21;
+  --slack-sidebar: #19171d;
+  --slack-hover: #27242c;
+  --slack-text: #d1d2d3;
+  --slack-text-dim: #ababad;
+  --slack-link: #1d9bd1;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.demo-title {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.demo-title span { color: var(--accent); }
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-dots { display: flex; gap: 6px; }
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.step-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.step-dot.done { background: var(--green); }
+
+.step-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  min-width: 320px;
+  text-align: right;
+}
+
+.nav-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.nav-hint kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+}
+
+.demo-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── JIRA BOARD ── */
+
+.jira-panel {
+  background: var(--jira-bg);
+  height: 195px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid var(--jira-blue);
+}
+
+.jira-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: #fff;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.jira-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--jira-blue);
+}
+
+.jira-logo svg { width: 20px; height: 20px; }
+
+.jira-project {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--jira-text);
+}
+
+.jira-board {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+}
+
+.jira-column {
+  flex: 1;
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jira-col-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--jira-text-dim);
+  padding: 2px 8px;
+  letter-spacing: 0.04em;
+}
+
+.jira-col-header .count {
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+.jira-col-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px;
+}
+
+.jira-card {
+  background: var(--jira-card);
+  border-radius: 3px;
+  padding: 8px 10px;
+  box-shadow: 0 1px 2px rgba(9,30,66,0.15);
+  font-size: 12px;
+  color: var(--jira-text);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jira-card.moving {
+  animation: cardPulse 0.5s ease;
+}
+
+@keyframes cardPulse {
+  0%   { transform: scale(0.95); opacity: 0.5; }
+  50%  { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,82,204,0.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.jira-card-key {
+  font-size: 11px;
+  color: var(--jira-blue);
+  font-weight: 600;
+}
+
+.jira-card-title {
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.jira-card .label {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-top: 4px;
+  font-weight: 600;
+  background: #deebff;
+  color: #0747a6;
+}
+
+/* ── SLACK ── */
+
+.slack-panel {
+  flex: 1;
+  display: flex;
+  background: var(--slack-bg);
+  overflow: hidden;
+}
+
+.slack-sidebar {
+  width: 210px;
+  background: var(--slack-sidebar);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.slack-workspace {
+  padding: 0 12px 10px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 8px;
+  padding-bottom: 10px;
+}
+
+.slack-section {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slack-text-dim);
+  margin-top: 4px;
+}
+
+.slack-channel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px 2px 20px;
+  font-size: 13px;
+  color: var(--slack-text-dim);
+  cursor: default;
+  transition: background 0.15s;
+}
+
+.slack-channel::before { content: '#'; font-size: 14px; opacity: 0.7; }
+
+.slack-channel.active {
+  background: var(--jira-blue);
+  color: #fff;
+  border-radius: 4px;
+  margin: 0 8px;
+  padding-left: 12px;
+}
+
+.slack-channel.active::before { opacity: 1; }
+
+.slack-dm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 12px 2px 20px;
+  font-size: 13px;
+  color: var(--slack-text-dim);
+  cursor: default;
+}
+
+.slack-dm .dm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.slack-dm .dm-dot.online { background: #2eb67d; }
+.slack-dm .dm-dot.offline { background: transparent; border: 1.5px solid var(--slack-text-dim); }
+
+.slack-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.slack-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+}
+
+.slack-header::before { content: '#'; margin-right: 6px; opacity: 0.5; }
+
+.slack-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.slack-msg {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slack-msg.visible { opacity: 1; transform: translateY(0); }
+
+.slack-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+
+.slack-msg-body { flex: 1; min-width: 0; }
+
+.slack-msg-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.slack-msg-name { font-weight: 700; font-size: 14px; color: #fff; }
+
+.slack-msg-name.bot::after {
+  content: 'APP';
+  font-size: 9px;
+  padding: 1px 4px;
+  margin-left: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  font-weight: 600;
+  color: var(--slack-text-dim);
+  vertical-align: middle;
+}
+
+.slack-msg-time { font-size: 11px; color: var(--slack-text-dim); }
+
+.slack-msg-text {
+  font-size: 14px;
+  color: var(--slack-text);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.slack-msg-text a { color: var(--slack-link); text-decoration: none; }
+
+.slack-msg-text code {
+  background: rgba(255,255,255,0.06);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: #e06c75;
+}
+
+.plan-block {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  margin: 8px 0 4px;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.plan-block h4 {
+  font-size: 13px;
+  color: var(--accent);
+  margin: 10px 0 3px;
+  font-weight: 600;
+}
+
+.plan-block h4:first-child { margin-top: 0; }
+.plan-block ul { padding-left: 18px; margin: 2px 0; }
+.plan-block li { margin: 2px 0; }
+
+.frontmatter {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--slack-text-dim);
+  margin: 6px 0;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.slack-reactions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.slack-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.slack-reaction.visible { opacity: 1; transform: scale(1); }
+
+.slack-reaction .rcount {
+  font-size: 11px;
+  color: var(--slack-text-dim);
+  font-weight: 600;
+}
+
+.slack-reaction.approved {
+  border-color: var(--green);
+  background: var(--green-glow);
+}
+
+.slack-thread-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 3px 0;
+  font-size: 12px;
+  color: var(--slack-link);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.slack-thread-indicator.visible { opacity: 1; }
+
+.slack-thread-indicator .avatars { display: flex; }
+
+.mini-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: -4px;
+  border: 2px solid var(--slack-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Thread panel */
+.slack-thread-panel {
+  width: 0;
+  overflow: hidden;
+  background: var(--slack-bg);
+  border-left: 1px solid rgba(255,255,255,0.06);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.slack-thread-panel.open { width: 400px; }
+
+.thread-header {
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+
+.thread-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 24px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.status-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.state-badge {
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+}
+
+.state-badge.pending    { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.state-badge.generating { background: var(--accent-glow); color: var(--accent); }
+.state-badge.review     { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.state-badge.approved   { background: var(--green-glow); color: var(--green); }
+.state-badge.implementing { background: rgba(232,145,45,0.15); color: #e8912d; }
+.state-badge.testing    { background: rgba(232,145,45,0.15); color: #e8912d; }
+.state-badge.reviewing  { background: rgba(163,113,247,0.15); color: #a371f7; }
+.state-badge.pr         { background: rgba(163,113,247,0.15); color: #a371f7; }
+.state-badge.human      { background: rgba(20,184,166,0.15); color: #14b8a6; }
+.state-badge.done       { background: var(--green-glow); color: var(--green); }
+
+/* Phase transitions */
+body { transition: --accent 0.5s ease; }
+
+body.phase-loop2 {
+  --accent: #e8912d;
+  --accent-glow: rgba(232, 145, 45, 0.15);
+}
+
+body.phase-loop3 {
+  --accent: #a371f7;
+  --accent-glow: rgba(163, 113, 247, 0.15);
+}
+
+body.phase-loop4 {
+  --accent: #14b8a6;
+  --accent-glow: rgba(20, 184, 166, 0.15);
+}
+
+body.phase-done {
+  --accent: #2ea043;
+  --accent-glow: rgba(46, 160, 67, 0.15);
+}
+
+/* Step dot separator between phases */
+.step-dot.separator {
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--border);
+  cursor: default;
+  margin: 0 3px;
+}
+
+/* Progress block styling — picks up phase accent color */
+.progress-block {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid var(--accent);
+  padding: 8px 14px;
+  margin: 8px 0 4px;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.progress-block h4 {
+  font-size: 13px;
+  color: var(--accent);
+  margin: 8px 0 3px;
+  font-weight: 600;
+}
+
+.progress-block h4:first-child { margin-top: 0; }
+.progress-block ul { padding-left: 18px; margin: 2px 0; }
+.progress-block li { margin: 2px 0; }
+
+.progress-block .pass { color: var(--green); font-weight: 600; }
+.progress-block .fail { color: var(--red); font-weight: 600; }
+.progress-block .score { font-size: 22px; font-weight: 700; }
+.progress-block .score.good { color: var(--green); }
+
+/* PR link block */
+.pr-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(163,113,247,0.1);
+  border: 1px solid rgba(163,113,247,0.25);
+  border-radius: 6px;
+  margin: 6px 0;
+  font-size: 13px;
+  color: #a371f7;
+  font-weight: 600;
+}
+
+.pr-link svg { width: 16px; height: 16px; fill: currentColor; }
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <div class="demo-title">AI-SDLC <span>Loop 1: Plan</span></div>
+  <div class="step-indicator">
+    <div class="step-label" id="stepLabel">Press → to start</div>
+    <div class="step-dots" id="stepDots"></div>
+  </div>
+  <div class="nav-hint"><kbd>←</kbd> <kbd>→</kbd> or click to advance</div>
+</div>
+
+<div class="demo-body">
+
+  <!-- JIRA BOARD -->
+  <div class="jira-panel">
+    <div class="jira-toolbar">
+      <div class="jira-logo">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78v1.7c0 2.4 1.94 4.34 4.34 4.35V2.84a.84.84 0 00-.84-.84H11.53zM6.77 6.8a4.36 4.36 0 004.34 4.34h1.8v1.72a4.36 4.36 0 004.34 4.34V7.63a.84.84 0 00-.84-.84H6.77zM2 11.6a4.35 4.35 0 004.34 4.34h1.8v1.72A4.35 4.35 0 0012.48 22v-9.56a.84.84 0 00-.84-.84H2z"/></svg>
+        Jira
+      </div>
+      <div class="jira-project">AI-SDLC-POC &middot; Board</div>
+    </div>
+    <div class="jira-board" id="jiraBoard">
+      <div class="jira-column">
+        <div class="jira-col-header">Backlog <span class="count" id="cntBacklog">0</span></div>
+        <div class="jira-col-body" id="colBacklog"></div>
+      </div>
+      <div class="jira-column">
+        <div class="jira-col-header">Refined <span class="count" id="cntRefined">1</span></div>
+        <div class="jira-col-body" id="colRefined">
+          <div class="jira-card" id="card-kan42" style="border-left:3px solid var(--jira-blue)">
+            <div class="jira-card-key">OLS-42</div>
+            <div class="jira-card-title">Allow configuring timeout and sse_read_timeout for built-in OpenShift MCP server</div>
+          </div>
+        </div>
+      </div>
+      <div class="jira-column">
+        <div class="jira-col-header">Ready for AI <span class="count" id="cntReady">0</span></div>
+        <div class="jira-col-body" id="colReady"></div>
+      </div>
+      <div class="jira-column">
+        <div class="jira-col-header">Plan Review <span class="count" id="cntPlanReview">0</span></div>
+        <div class="jira-col-body" id="colPlanReview"></div>
+      </div>
+      <div class="jira-column">
+        <div class="jira-col-header">Implementing <span class="count" id="cntImplementing">0</span></div>
+        <div class="jira-col-body" id="colImplementing"></div>
+      </div>
+      <div class="jira-column">
+        <div class="jira-col-header">PR Review <span class="count" id="cntPrReview">0</span></div>
+        <div class="jira-col-body" id="colPrReview"></div>
+      </div>
+      <div class="jira-column">
+        <div class="jira-col-header">Done <span class="count" id="cntDone">0</span></div>
+        <div class="jira-col-body" id="colDone"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLACK -->
+  <div class="slack-panel">
+    <div class="slack-sidebar">
+      <div class="slack-workspace">Red Hat</div>
+      <div class="slack-section">AI-SDLC</div>
+      <div class="slack-channel active">ols-ai-sdlc</div>
+      <div class="slack-channel">wg-aap-ai-dlc</div>
+      <div class="slack-section" style="margin-top:10px">Channels</div>
+      <div class="slack-channel">forum-ai-agents</div>
+      <div class="slack-channel">forum-ai-ethics</div>
+      <div class="slack-channel">forum-observability</div>
+      <div class="slack-channel">team-ocp-lightspeed</div>
+      <div class="slack-channel">announce-engineering</div>
+      <div class="slack-section" style="margin-top:10px">Direct messages</div>
+      <div class="slack-dm"><span class="dm-dot online"></span>Ellie Williams</div>
+      <div class="slack-dm"><span class="dm-dot online"></span>Vaas Montenegro</div>
+      <div class="slack-dm"><span class="dm-dot offline"></span>Johny Silver</div>
+      <div class="slack-dm"><span class="dm-dot offline"></span>Trevor Philips</div>
+      <div class="slack-dm"><span class="dm-dot offline"></span>Aloy Nora</div>
+    </div>
+    <div class="slack-main">
+      <div class="slack-header">ols-ai-sdlc</div>
+      <div class="slack-messages" id="slackMessages"></div>
+    </div>
+    <div class="slack-thread-panel" id="threadPanel">
+      <div class="thread-header">Thread</div>
+      <div class="thread-messages" id="threadMessages"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div class="status-state">
+    <span style="color:var(--text-dim)">Workflow state:</span>
+    <span class="state-badge pending" id="stateBadge">idle</span>
+  </div>
+</div>
+
+<script>
+const AVATARS = {
+  bot:    { bg: '#1264a3', initials: 'AI' },
+  ondrej: { bg: '#e01e5a', initials: 'JS' },
+  sara:   { bg: '#2eb67d', initials: 'EW' },
+  james:  { bg: '#ecb22e', initials: 'VM' },
+};
+
+function avatar(who, mini) {
+  const a = AVATARS[who];
+  const cls = mini ? 'mini-avatar' : 'slack-avatar';
+  return `<div class="${cls}" style="background:${a.bg}">${a.initials}</div>`;
+}
+
+const STORY_TITLE = 'Allow configuring timeout and sse_read_timeout for built-in OpenShift MCP server';
+
+const PLAN_HTML = `<div class="frontmatter">story_id: OLS-42
+title: Configure timeout/sse_read_timeout for built-in MCP server
+estimated_scope: M
+risk_level: low</div>
+<div class="plan-block">
+<h4>Summary</h4>
+Expose <code>timeout</code> and <code>sse_read_timeout</code> fields in
+OLSConfig for the built-in OpenShift MCP server created when
+<code>introspectionEnabled: true</code>. Current hardcoded defaults
+(60s / 30s) cause Prometheus queries to fail with ReadTimeout. Also
+document maximum values and evaluate whether both fields are needed.
+
+<h4>Files to change</h4>
+<ul>
+<li><b>api/v1alpha1/olsconfig_types.go</b> — modify; add
+<code>Timeout</code> and <code>SSEReadTimeout</code> to
+IntrospectionConfig struct with validation markers</li>
+<li><b>internal/controller/ols_configmap.go</b> — modify; read new
+fields and pass to MCP server config generation</li>
+<li><b>internal/controller/ols_configmap_test.go</b> — modify; add
+test cases for timeout propagation</li>
+<li><b>config/crd/bases/</b> — regenerate; CRD picks up new fields</li>
+<li><b>docs/mcp-server.md</b> — modify; document timeout fields,
+defaults, and maximum values</li>
+</ul>
+
+<h4>Acceptance criteria mapping</h4>
+<ul>
+<li><b>AC1:</b> User can set <code>timeout</code> in OLSConfig →
+built-in MCP server uses that value → test_custom_timeout</li>
+<li><b>AC2:</b> User can set <code>sse_read_timeout</code> →
+built-in MCP server uses that value → test_custom_sse_timeout</li>
+<li><b>AC3:</b> Omitting both fields falls back to current defaults
+(60s / 30s) → test_default_timeouts</li>
+<li><b>AC4:</b> Values exceeding maximum are rejected by validation
+webhook → test_timeout_validation</li>
+</ul>
+
+<h4>Risk assessment</h4>
+<ul>
+<li>CRD schema change requires operator upgrade — existing CRs stay
+valid since new fields are optional with defaults</li>
+<li>Very large timeouts could hold connections open — cap with a
+documented maximum (e.g. 300s)</li>
+</ul>
+
+<h4>Open questions</h4>
+<ul>
+<li>Do we actually need two separate timeout fields, or can a single
+<code>timeout</code> cover both?</li>
+<li>Should we remove <code>introspectionEnabled: true</code> as the
+only toggle and let users configure the built-in server explicitly?</li>
+<li>What is a reasonable maximum timeout to document?</li>
+</ul>
+</div>`;
+
+const PR_SVG = `<svg viewBox="0 0 16 16"><path d="M7.177 3.073L9.573.677A.25.25 0 0110 .854v4.792a.25.25 0 01-.427.177L7.177 3.427a.25.25 0 010-.354zM3.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122v5.256a2.251 2.251 0 11-1.5 0V5.372A2.25 2.25 0 011.5 3.25zM11 2.5h-1V4h1a1 1 0 011 1v5.628a2.251 2.251 0 101.5 0V5A2.5 2.5 0 0011 2.5zm1 10.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM3.75 12a.75.75 0 100 1.5.75.75 0 000-1.5z"/></svg>`;
+
+const PR_BLOCK = `<div style="margin-top:8px">`
+  + `<span class="pr-link">${PR_SVG}`
+  + `#137 — OLS-42: Configure timeout and sse_read_timeout for built-in MCP server`
+  + `</span></div>`;
+
+
+// ── Step definitions ─────────────────────────────────────
+
+const STEPS = [
+  // ── LOOP 1: Plan (Team) ──────────────────────────────────
+
+  {
+    label: 'OLS-42 is refined, sitting in Refined column',
+    state: { text: 'idle', cls: 'pending' },
+    action() {}
+  },
+  {
+    label: 'Team drags OLS-42 to "Ready for AI"',
+    state: { text: 'plan_pending', cls: 'pending' },
+    action() {
+      moveCard('card-kan42', 'colRefined', 'colReady');
+      setCounts({ cntRefined: 0, cntReady: 1 });
+    }
+  },
+  {
+    label: 'Service picks up story — adds ai-picked-up label',
+    state: { text: 'plan_pending', cls: 'generating' },
+    action() {
+      const c = document.getElementById('card-kan42');
+      if (c && !c.querySelector('.label'))
+        c.insertAdjacentHTML('beforeend',
+          '<div class="label">ai-picked-up</div>');
+    }
+  },
+  {
+    label: 'AI reads story + gathers repo context',
+    state: { text: 'plan_generating', cls: 'generating' },
+    action() {
+      postChannel('bot', 'AI-SDLC Bot', '2:47 PM',
+        `📥 <b>New story picked up:</b> <a href="#">OLS-42</a> `
+        + `— ${STORY_TITLE}<br>`
+        + `<em>Reading story and gathering repo context…</em>`);
+    }
+  },
+  {
+    label: 'AI generates plan — opens Plan Review thread',
+    state: { text: 'plan_review', cls: 'review' },
+    action() {
+      postChannel('bot', 'AI-SDLC Bot', '2:48 PM',
+        `📋 <b>Plan Review</b> for <a href="#">OLS-42</a> — `
+        + `${STORY_TITLE}`,
+        'loop1');
+      openThreadFor('loop1');
+      postThread('loop1', 'bot', 'AI-SDLC Bot', '2:48 PM',
+        `<b>Implementation Plan v1</b>${PLAN_HTML}`);
+      moveCard('card-kan42', 'colReady', 'colPlanReview');
+      setCounts({ cntReady: 0, cntPlanReview: 1 });
+    }
+  },
+  {
+    label: 'Ellie asks about timeout fields in thread',
+    state: { text: 'plan_review', cls: 'review' },
+    action() {
+      postThread('loop1', 'sara', 'Ellie Williams', '2:52 PM',
+        `Do we really need two separate timeout fields? A single `
+        + `<code>timeout</code> that covers both the connection and `
+        + `SSE read might be simpler for users. Less config surface.`);
+    }
+  },
+  {
+    label: 'Vaas weighs in — keep two fields, cap at 300s',
+    state: { text: 'plan_review', cls: 'review' },
+    action() {
+      postThread('loop1', 'james', 'Vaas Montenegro', '2:55 PM',
+        `Keep both. SSE read timeout needs to be shorter than `
+        + `the connection timeout or you get hung streams. `
+        + `Cap at 300s and document why. Also: let's not touch `
+        + `<code>introspectionEnabled</code> in this story — `
+        + `separate concern.`);
+    }
+  },
+  {
+    label: 'Johny aligns and approves with /approve',
+    state: { text: 'plan_review', cls: 'review' },
+    action() {
+      postThread('loop1', 'ondrej', 'Johny Silver', '3:01 PM',
+        `Agreed — two fields, 300s max, leave introspection `
+        + `toggle alone. Plan looks good.`);
+      postThread('loop1', 'ondrej', 'Johny Silver', '3:01 PM',
+        `<span style="color:var(--slack-link);font-family:'DM Mono',monospace;font-size:13px">/approve</span>`);
+    }
+  },
+  {
+    label: 'Service detects /approve — plan_approved',
+    state: { text: 'plan_approved', cls: 'approved' },
+    action() {
+      postThread('loop1', 'bot', 'AI-SDLC Bot', '3:02 PM',
+        `✅ <b>Plan approved.</b> Transitioning to implementation.`);
+      closeThread();
+      postChannel('bot', 'AI-SDLC Bot', '3:02 PM',
+        `✅ <b>Plan approved</b> by Johny Silver for <a href="#">OLS-42</a>. `
+        + `Jira → <b>Implementing</b>.`);
+      moveCard('card-kan42', 'colPlanReview', 'colImplementing');
+      setCounts({ cntPlanReview: 0, cntImplementing: 1 });
+    }
+  },
+
+  // ── LOOP 2: Implement (Agent) ───────────────────────────
+
+  {
+    label: 'Loop 2 begins — opens Implementation thread',
+    phase: 'loop2',
+    state: { text: 'implementing', cls: 'implementing' },
+    action() {
+      setPhase('loop2');
+      postChannel('bot', 'AI-SDLC Bot', '3:03 PM',
+        `🔧 <b>Implementation</b> for <a href="#">OLS-42</a> — `
+        + `${STORY_TITLE}`,
+        'loop2');
+      openThreadFor('loop2');
+      postThread('loop2', 'bot', 'AI-SDLC Bot', '3:03 PM',
+        `<b>Starting implementation</b><br>`
+        + `Branch: <code>feature/OLS-42-mcp-timeout-config</code>`);
+    }
+  },
+  {
+    label: 'Agent implements API types + controller changes',
+    phase: 'loop2',
+    state: { text: 'implementing', cls: 'implementing' },
+    action() {
+      postThread('loop2', 'bot', 'AI-SDLC Bot', '3:08 PM',
+        `⚙️ <b>Implementation progress</b>`
+        + `<div class="progress-block">`
+        + `<h4>Files modified</h4><ul>`
+        + `<li>✅ <b>api/v1alpha1/olsconfig_types.go</b> — added `
+        + `<code>Timeout</code> and <code>SSEReadTimeout</code> `
+        + `fields to IntrospectionConfig with `
+        + `<code>+kubebuilder:validation:Maximum=300</code></li>`
+        + `<li>✅ <b>internal/controller/ols_configmap.go</b> — `
+        + `reads new fields, passes to MCP server config; defaults `
+        + `60s / 30s when omitted</li>`
+        + `<li>✅ <b>config/crd/bases/</b> — CRD regenerated</li>`
+        + `<li>✅ <b>docs/mcp-server.md</b> — documented fields, `
+        + `defaults, 300s max</li>`
+        + `</ul></div>`);
+    }
+  },
+  {
+    label: 'Agent runs tests — 1 failure',
+    phase: 'loop2',
+    state: { text: 'implementing', cls: 'testing' },
+    action() {
+      postThread('loop2', 'bot', 'AI-SDLC Bot', '3:12 PM',
+        `🧪 <b>Test run #1</b>`
+        + `<div class="progress-block">`
+        + `<h4>Results: 3 passed, 1 failed</h4><ul>`
+        + `<li><span class="pass">PASS</span> test_custom_timeout</li>`
+        + `<li><span class="pass">PASS</span> test_custom_sse_timeout</li>`
+        + `<li><span class="pass">PASS</span> test_default_timeouts</li>`
+        + `<li><span class="fail">FAIL</span> test_timeout_validation `
+        + `— expected 422, got 201 (validation webhook not wired)</li>`
+        + `</ul></div>`);
+    }
+  },
+  {
+    label: 'Agent fixes validation, reruns — all pass',
+    phase: 'loop2',
+    state: { text: 'implementing', cls: 'testing' },
+    action() {
+      postThread('loop2', 'bot', 'AI-SDLC Bot', '3:15 PM',
+        `🧪 <b>Test run #2</b> — fixed webhook registration`
+        + `<div class="progress-block">`
+        + `<h4>Results: 4 passed, 0 failed</h4><ul>`
+        + `<li><span class="pass">PASS</span> test_custom_timeout</li>`
+        + `<li><span class="pass">PASS</span> test_custom_sse_timeout</li>`
+        + `<li><span class="pass">PASS</span> test_default_timeouts</li>`
+        + `<li><span class="pass">PASS</span> test_timeout_validation</li>`
+        + `</ul></div>`);
+    }
+  },
+  {
+    label: 'Agent creates PR — Jira → PR Review',
+    phase: 'loop2',
+    state: { text: 'pr_created', cls: 'pr' },
+    action() {
+      postThread('loop2', 'bot', 'AI-SDLC Bot', '3:17 PM',
+        `🚀 <b>PR created</b>${PR_BLOCK}`);
+      postChannel('bot', 'AI-SDLC Bot', '3:17 PM',
+        `🚀 <b>PR created</b> for <a href="#">OLS-42</a>. `
+        + `Jira → <b>PR Review</b>.${PR_BLOCK}`);
+      moveCard('card-kan42', 'colImplementing', 'colPrReview');
+      setCounts({ cntImplementing: 0, cntPrReview: 1 });
+    }
+  },
+
+  // ── LOOP 3: AI Review ───────────────────────────────────
+
+  {
+    label: 'Loop 3 begins — AI reviews the PR',
+    phase: 'loop3',
+    state: { text: 'ai_reviewing', cls: 'reviewing' },
+    action() {
+      setPhase('loop3');
+      closeThread();
+      postChannel('bot', 'AI-SDLC Bot', '3:18 PM',
+        `🔍 <b>AI Review</b> for <a href="#">OLS-42</a> — `
+        + `PR #137`,
+        'loop3');
+      openThreadFor('loop3');
+      postThread('loop3', 'bot', 'AI-SDLC Bot', '3:18 PM',
+        `<b>Starting automated code review</b> of PR #137…`);
+    }
+  },
+  {
+    label: 'AI posts review findings — 3 items',
+    phase: 'loop3',
+    state: { text: 'ai_reviewing', cls: 'reviewing' },
+    action() {
+      postThread('loop3', 'bot', 'AI-SDLC Bot', '3:19 PM',
+        `📋 <b>Review findings</b>`
+        + `<div class="progress-block">`
+        + `<h4>3 items found</h4><ul>`
+        + `<li><span class="pass">ACCEPT</span> <b>R1:</b> `
+        + `<code>sse_read_timeout</code> should be validated `
+        + `<code>&lt; timeout</code> — relationship constraint missing</li>`
+        + `<li><span class="pass">ACCEPT</span> <b>R2:</b> `
+        + `docs should include a worked example for long-running `
+        + `Prometheus queries (noted in adherence assessment)</li>`
+        + `<li><span class="fail">REJECT</span> <b>R3:</b> `
+        + `refactor MCP server factory to use builder pattern `
+        + `— <em>out of scope for this story</em></li>`
+        + `</ul></div>`);
+    }
+  },
+  {
+    label: 'Agent addresses accepted items, pushes update',
+    phase: 'loop3',
+    state: { text: 'ai_reviewing', cls: 'reviewing' },
+    action() {
+      postThread('loop3', 'bot', 'AI-SDLC Bot', '3:21 PM',
+        `⚙️ <b>Addressing accepted review items</b>`
+        + `<div class="progress-block"><ul>`
+        + `<li>✅ <b>R1:</b> Added validation — `
+        + `<code>sse_read_timeout</code> must be &lt; `
+        + `<code>timeout</code>; added test_timeout_relationship</li>`
+        + `<li>✅ <b>R2:</b> Added worked Prometheus example to `
+        + `<code>docs/mcp-server.md</code></li>`
+        + `<li>⏭️ <b>R3:</b> Skipped — rejected as out of scope</li>`
+        + `</ul>`
+        + `Pushed commit <code>abc1234</code>`
+        + `</div>`);
+    }
+  },
+  {
+    label: 'Second AI review — all items resolved',
+    phase: 'loop3',
+    state: { text: 'ai_review_passed', cls: 'reviewing' },
+    action() {
+      postThread('loop3', 'bot', 'AI-SDLC Bot', '3:23 PM',
+        `✅ <b>Re-review complete</b>`
+        + `<div class="progress-block">`
+        + `<h4>All accepted items addressed</h4><ul>`
+        + `<li><span class="pass">RESOLVED</span> R1 — validation added</li>`
+        + `<li><span class="pass">RESOLVED</span> R2 — docs updated</li>`
+        + `</ul>`
+        + `<h4>Updated adherence score</h4>`
+        + `<span class="score good">96 / 100</span>`
+        + `<div style="margin-top:4px;font-size:12px;color:var(--slack-text-dim)">`
+        + `+4 from initial 92 — validation gap and docs gap closed</div>`
+        + `</div>`);
+      postChannel('bot', 'AI-SDLC Bot', '3:23 PM',
+        `✅ <b>AI Review passed</b> for <a href="#">OLS-42</a> PR #137. `
+        + `Adherence: 96/100. Awaiting human review.`);
+    }
+  },
+
+  // ── LOOP 4: Human Review ────────────────────────────────
+
+  {
+    label: 'Loop 4 begins — Johny reviews the PR',
+    phase: 'loop4',
+    state: { text: 'human_review', cls: 'human' },
+    action() {
+      setPhase('loop4');
+      closeThread();
+      postChannel('bot', 'AI-SDLC Bot', '3:30 PM',
+        `👤 <b>Human Review</b> for <a href="#">OLS-42</a> — `
+        + `PR #137`,
+        'loop4');
+      openThreadFor('loop4');
+      postThread('loop4', 'ondrej', 'Johny Silver', '3:32 PM',
+        `Taking a look at the PR…`);
+    }
+  },
+  {
+    label: 'Johny requests a small change',
+    phase: 'loop4',
+    state: { text: 'human_review', cls: 'human' },
+    action() {
+      postThread('loop4', 'ondrej', 'Johny Silver', '3:38 PM',
+        `The 300s cap is good, but can we add an inline comment `
+        + `in <code>olsconfig_types.go</code> explaining <em>why</em> `
+        + `300s? Future devs won't have the Slack context. `
+        + `Non-blocking, but let's fix before merge.`);
+    }
+  },
+  {
+    label: 'Agent fixes, pushes update',
+    phase: 'loop4',
+    state: { text: 'human_review', cls: 'human' },
+    action() {
+      postThread('loop4', 'bot', 'AI-SDLC Bot', '3:39 PM',
+        `⚙️ Added inline comment explaining 300s cap rationale `
+        + `in <code>olsconfig_types.go</code>. `
+        + `Pushed commit <code>def5678</code>.`);
+    }
+  },
+  {
+    label: 'Johny approves — PR merged, Jira → Done',
+    phase: 'loop4',
+    state: { text: 'done', cls: 'done' },
+    action() {
+      postThread('loop4', 'ondrej', 'Johny Silver', '3:41 PM',
+        `<span style="color:var(--slack-link);font-family:'DM Mono',monospace;font-size:13px">/approve</span> — looks good, nice work.`);
+      postThread('loop4', 'bot', 'AI-SDLC Bot', '3:41 PM',
+        `✅ <b>PR approved</b> by Johny Silver. Merging…`);
+      postChannel('bot', 'AI-SDLC Bot', '3:41 PM',
+        `🎉 <b>PR #137 merged</b> for <a href="#">OLS-42</a>. `
+        + `Jira → <b>Done</b>.`);
+      moveCard('card-kan42', 'colPrReview', 'colDone');
+      setCounts({ cntPrReview: 0, cntDone: 1 });
+      setPhase('done');
+    }
+  },
+];
+
+
+// ── Engine ────────────────────────────────────────────────
+
+let cur = -1;
+let currentPhase = 'loop1';
+const parentEls = {};
+const threadCounts = {};
+const threadParticipants = {};
+const $channel = document.getElementById('slackMessages');
+const $threadMsgs = document.getElementById('threadMessages');
+const $threadPanel = document.getElementById('threadPanel');
+const $threadHeader = document.querySelector('.thread-header');
+const $dots   = document.getElementById('stepDots');
+const $label  = document.getElementById('stepLabel');
+const $badge  = document.getElementById('stateBadge');
+const $title  = document.querySelector('.demo-title span');
+
+const PHASE_STARTS = {};
+STEPS.forEach((s, i) => {
+  if (s.phase && !PHASE_STARTS[s.phase]) PHASE_STARTS[s.phase] = i;
+});
+
+STEPS.forEach((s, i) => {
+  if (PHASE_STARTS[s.phase] === i) {
+    $dots.appendChild(Object.assign(document.createElement('div'),
+      { className: 'step-dot separator' }));
+  }
+  const d = document.createElement('div');
+  d.className = 'step-dot';
+  d.addEventListener('click', () => goTo(i));
+  $dots.appendChild(d);
+});
+
+const PHASE_CLASSES = ['phase-loop2', 'phase-loop3', 'phase-loop4', 'phase-done'];
+
+function setPhase(phase) {
+  currentPhase = phase;
+  document.body.classList.remove(...PHASE_CLASSES);
+  const titles = {
+    loop1: 'Loop 1: Plan',
+    loop2: 'Loop 2: Implement',
+    loop3: 'Loop 3: AI Review',
+    loop4: 'Loop 4: Human Review',
+    done:  '✅ Done',
+  };
+  $title.textContent = titles[phase] || titles.loop1;
+  if (phase !== 'loop1') document.body.classList.add('phase-' + phase);
+}
+
+function goTo(target) {
+  if (target < -1 || target >= STEPS.length) return;
+  if (target <= cur) { reset(); for (let i = 0; i <= target; i++) run(i); }
+  else { for (let i = cur + 1; i <= target; i++) run(i); }
+  cur = target;
+}
+
+function run(i) {
+  const s = STEPS[i];
+  s.action();
+  const dots = [...$dots.children].filter(d => !d.classList.contains('separator'));
+  dots.forEach((d, j) => {
+    d.className = 'step-dot' + (j < i ? ' done' : j === i ? ' active' : '');
+  });
+  $label.textContent = s.label;
+  $badge.textContent = s.state.text;
+  $badge.className = 'state-badge ' + s.state.cls;
+}
+
+function reset() {
+  cur = -1;
+  setPhase('loop1');
+  for (const k in parentEls) delete parentEls[k];
+  for (const k in threadCounts) delete threadCounts[k];
+  for (const k in threadParticipants) delete threadParticipants[k];
+  $channel.innerHTML = '';
+  $threadMsgs.innerHTML = '';
+  $threadPanel.classList.remove('open');
+  $threadHeader.textContent = 'Thread';
+  document.getElementById('colBacklog').innerHTML = '';
+  document.getElementById('colRefined').innerHTML =
+    `<div class="jira-card" id="card-kan42" style="border-left:3px solid var(--jira-blue)"><div class="jira-card-key">OLS-42</div><div class="jira-card-title">${STORY_TITLE}</div></div>`;
+  ['colReady','colPlanReview','colImplementing','colPrReview','colDone']
+    .forEach(id => document.getElementById(id).innerHTML = '');
+  setCounts({ cntBacklog:0, cntRefined:1, cntReady:0,
+    cntPlanReview:0, cntImplementing:0, cntPrReview:0, cntDone:0 });
+  $label.textContent = 'Press → to start';
+  $badge.textContent = 'idle';
+  $badge.className = 'state-badge pending';
+  [...$dots.children].forEach(d => {
+    if (!d.classList.contains('separator'))
+      d.className = 'step-dot';
+  });
+}
+
+// ── Card movement ──
+
+function moveCard(id, from, to) {
+  const card = document.getElementById(id);
+  if (!card) return;
+  card.remove();
+  document.getElementById(to).appendChild(card);
+  card.classList.add('moving');
+  setTimeout(() => card.classList.remove('moving'), 500);
+}
+
+function setCounts(obj) {
+  for (const [id, v] of Object.entries(obj)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v;
+  }
+}
+
+// ── Slack messaging ──
+
+function buildMsg(who, name, time, html) {
+  const m = document.createElement('div');
+  m.className = 'slack-msg';
+  const isBot = who === 'bot';
+  m.innerHTML = `
+    ${avatar(who)}
+    <div class="slack-msg-body">
+      <div class="slack-msg-header">
+        <span class="slack-msg-name${isBot ? ' bot' : ''}">${name}</span>
+        <span class="slack-msg-time">${time}</span>
+      </div>
+      <div class="slack-msg-text">${html}</div>
+    </div>`;
+  return m;
+}
+
+function animateIn(el, container) {
+  container.appendChild(el);
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => el.classList.add('visible')));
+  container.scrollTop = container.scrollHeight;
+}
+
+function postChannel(who, name, time, html, parentId) {
+  const m = buildMsg(who, name, time, html);
+  if (parentId) {
+    m.id = parentId;
+    parentEls[parentId] = m;
+    threadCounts[parentId] = 0;
+    threadParticipants[parentId] = new Set();
+  }
+  animateIn(m, $channel);
+  return m;
+}
+
+function postThread(parentId, who, name, time, html) {
+  const m = buildMsg(who, name, time, html);
+  animateIn(m, $threadMsgs);
+  if (parentEls[parentId]) {
+    threadCounts[parentId]++;
+    if (who !== 'bot') threadParticipants[parentId].add(who);
+    updateThreadIndicator(parentId);
+  }
+  return m;
+}
+
+function updateThreadIndicator(parentId) {
+  const parent = parentEls[parentId];
+  if (!parent) return;
+  const count = threadCounts[parentId];
+  const participants = threadParticipants[parentId];
+  let ind = parent.querySelector('.slack-thread-indicator');
+  if (!ind) {
+    ind = document.createElement('div');
+    ind.className = 'slack-thread-indicator';
+    parent.querySelector('.slack-msg-body').appendChild(ind);
+  }
+  const avatarKeys = [...participants].slice(0, 3);
+  if (avatarKeys.length === 0) avatarKeys.push('bot');
+  ind.innerHTML = `
+    <div class="avatars">
+      ${avatarKeys.map(k => avatar(k, true)).join('')}
+    </div>
+    <span>${count} ${count === 1 ? 'reply' : 'replies'}</span>`;
+  ind.classList.add('visible');
+}
+
+function openThreadFor(parentId) {
+  $threadMsgs.innerHTML = '';
+  const labels = {
+    loop1: 'Thread — Plan Review',
+    loop2: 'Thread — Implementation',
+    loop3: 'Thread — AI Review',
+    loop4: 'Thread — Human Review',
+  };
+  $threadHeader.textContent = labels[parentId] || 'Thread';
+  $threadPanel.classList.add('open');
+}
+
+function closeThread() {
+  $threadPanel.classList.remove('open');
+}
+
+// ── Navigation ──
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    if (cur < STEPS.length - 1) goTo(cur + 1);
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (cur > -1) goTo(cur - 1); else reset();
+  }
+});
+
+document.querySelector('.demo-body').addEventListener('click', e => {
+  if (e.target.closest('.step-dot')) return;
+  if (cur < STEPS.length - 1) goTo(cur + 1);
+});
+
+setCounts({ cntBacklog:0, cntRefined:1, cntReady:0,
+  cntPlanReview:0, cntImplementing:0, cntPrReview:0, cntDone:0 });
+</script>
+</body>
+</html>
