@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/reins_header.jpg" alt="Reins — human holding the reins on an AI horse" width="100%" />
+</p>
+
 # Reins
 
 A deterministic backend that drives AI agent runtimes through a
