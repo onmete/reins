@@ -99,6 +99,19 @@ Brief description of the overall implementation strategy.
 Why this approach over alternatives (1-2 sentences if
 non-obvious).
 
+If the story involves logically independent changes (e.g.,
+a refactor + a new feature that uses it, or an API change +
+a migration), split into separate PRs:
+
+### PR 1: {short title}
+{what this PR contains and why it's separate}
+
+### PR 2: {short title}
+{what this PR contains, dependencies on PR 1 if any}
+
+If the story is a single coherent change, omit the PR
+breakdown.
+
 ## Per-Criterion Plan
 
 ### AC 1: {criterion text}
