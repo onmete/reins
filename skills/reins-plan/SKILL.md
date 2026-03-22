@@ -75,7 +75,7 @@ After writing, print the plan and tell the user:
 
 ```
 Note: Planning works best with a capable model (not fast).
-Review the plan. When ready: /reins-implement implement {story_id}
+Review the plan. When ready: /reins-implement {story_id}
 ```
 
 ## Plan Format

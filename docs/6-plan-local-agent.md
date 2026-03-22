@@ -237,7 +237,7 @@ one-off correction.
 A dedicated skill that runs after any phase. Each core skill's
 final output suggests it:
 
-> "When ready: /reins-retro retro OLS-42"
+> "When ready: /reins-retro OLS-42"
 
 The `reins-retro` skill:
 1. Asks: "Did anything go wrong or need manual correction?"
@@ -318,23 +318,23 @@ Agent:
   → produces plan, saves .reins/plans/OLS-42.md
   → prints plan summary
   → "Review the plan. When ready:
-     /reins-implement implement OLS-42"
+     /reins-implement OLS-42"
 ```
 
 Developer reviews plan in editor. Edits if needed.
 
 ```
-Developer: /reins-implement implement OLS-42
+Developer: /reins-implement OLS-42
 
 Agent:
   → reads plan from .reins/plans/OLS-42.md
   → implements changes, writes tests, runs tests
   → "Tests pass. When ready:
-     /reins-review review OLS-42"
+     /reins-review OLS-42"
 ```
 
 ```
-Developer: /reins-review review OLS-42
+Developer: /reins-review OLS-42
 
 Agent:
   → reads AC + git diff + plan
@@ -350,7 +350,7 @@ the plan file directly and re-run `/reins-plan`, or use
 `/reins-refine`:
 
 ```
-Developer: /reins-refine refine OLS-42
+Developer: /reins-refine OLS-42
   "The plan should use the existing validator module
    instead of creating a new one."
 
@@ -360,7 +360,7 @@ Agent: Reading existing plan and your feedback. Revising...
 If the review finds failures:
 
 ```
-Developer: /reins-fix fix OLS-42
+Developer: /reins-fix OLS-42
 
 Agent: Reading review. 1 failing AC found. Fixing...
 ```
