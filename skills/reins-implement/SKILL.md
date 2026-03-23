@@ -84,10 +84,11 @@ skip failures.
 - **Tests alongside code** — every AC that changes behavior
   must have a corresponding test. Write the test in the same
   pass as the implementation, not as a separate step.
-- **Run linting and tests before declaring done** — run
-  linting and type checks first, then the full test suite.
-  Report failures honestly; do not declare done if either
-  fails.
+- **Run linting and tests before declaring done** — run the
+  project's full verification suite (check AGENTS.md or
+  Makefile for the command — e.g. `make verify`), not
+  targeted file checks. Then run the full test suite. Report
+  failures honestly; do not declare done if either fails.
 - **No planning** — do not re-explore the codebase to
   second-guess the plan. The plan already did that work.
   Trust it, or reject it — don't silently deviate.
