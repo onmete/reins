@@ -119,6 +119,70 @@ production systems will likely use both — a convention harness for the
 codebase + programmatic harnesses for specific high-reliability
 workflows.
 
+## Harness Delivery Mechanisms
+
+The harness is the system of constraints, context, verification, and
+correction. But those rules need to reach the agent somehow. Skills,
+AGENTS.md, linters, and programmatic backends are all **delivery
+mechanisms** — different ways of getting the harness into the agent's
+operating context.
+
+| Mechanism              | When it loads       | What it delivers                    |
+|------------------------|---------------------|-------------------------------------|
+| `AGENTS.md` / system prompt | Always (ambient) | Map, conventions, global rules     |
+| Skills (`SKILL.md`)    | On demand (progressive) | Workflow-specific constraints + procedures |
+| Linters / CI           | At validation time  | Mechanical enforcement              |
+| Structural tests       | At validation time  | Architectural invariants            |
+| Programmatic backend   | At runtime          | Deterministic orchestration         |
+
+This reframes the relationship between skills and harnesses. Skills
+are not a separate concept from harness engineering — they are one
+delivery channel for it. A skill like `reins-implement` delivers
+harness constraints (follow the plan, stay in scope, tests alongside
+code, stop if the plan is wrong) packaged as a modular, on-demand
+unit. The constraints are the harness; the SKILL.md format is how they
+reach the agent.
+
+### The Mega-Prompt Problem
+
+Lanham (Feb 2026) argues that monolithic system prompts are breaking:
+token costs scale linearly with prompt size, the "lost-in-the-middle"
+effect causes models to ignore instructions buried in long contexts,
+and tool schemas alone can consume 55K-100K+ tokens before a single
+user message arrives.
+
+The fix is progressive disclosure — the same pattern OpenAI advocates
+for `AGENTS.md`. Three levels:
+
+1. **Metadata** (~100 tokens/skill) — name + description loaded at
+   startup. 50 skills = ~5K tokens for discovery.
+2. **Instructions** (SKILL.md body, <5K tokens) — loaded only when
+   the agent activates the skill for the current task.
+3. **Resources** (scripts, references, assets) — loaded only when
+   instructions explicitly call for them.
+
+This is token-efficient (10K vs. 50K+ for an equivalent mega-prompt),
+composable (multiple skills combine without merging), portable (same
+SKILL.md format works across Claude, Codex, Copilot, LangChain), and
+version-controllable (Git workflows for organizational knowledge).
+
+### Skills as Organizational Asset
+
+The durable investment is the skill library, not the runtime. "The
+model and agent harness will change, but your skill library is a
+versioned asset you can port, audit, and continuously improve"
+(Lanham). The `reins-*` skills in this project would survive a switch
+from Claude Code to Codex or any other runtime.
+
+### Security Concern
+
+SkillsBench found that 26% of analyzed skills contained vulnerability
+patterns (prompt injection, data exfiltration, privilege escalation).
+Skills bundling executable scripts were 2.12x more likely to contain
+vulnerabilities. This supports AI-SDLC's guardrails model — org-level
+policies restricting what skills can do, with `allowed-tools`
+frontmatter and sandboxed execution.
+
 ## The Three Pillars (OpenAI Convention Harness)
 
 ### 1. Context Engineering
@@ -465,6 +529,11 @@ sub-agents with only the relevant context injected.
   — Evidence that major AI labs converged on identical architectures.
 - [OpenAI Codex Execution Plans Cookbook](https://cookbook.openai.com/articles/codex_exec_plans)
   — Practical guide for execution plans as first-class artifacts.
+- [5 Skills Every AI Agent Needs (And Why Your Mega-Prompt Is Holding You Back)](https://medium.com/@Micheal-Lanham/5-skills-every-ai-agent-needs-and-why-your-mega-prompt-is-holding-you-back-4b4ab2471c0e)
+  — Micheal Lanham (Feb 27, 2026). Skills as a delivery mechanism for
+  harness constraints. Progressive disclosure model, cross-framework
+  portability, security concerns (26% of skills contain vulnerability
+  patterns). Skills are a channel for the harness, not a separate concept.
 - [Andrej Karpathy's Math Proves Agent Skills Will Fail. Here's What to Build Instead](https://www.youtube.com/watch?v=I2K81s0OQto)
   — The AI Automators (Mar 21, 2026). Practical demo of a specialized
   contract review harness. Covers March of Nines reliability framing,
