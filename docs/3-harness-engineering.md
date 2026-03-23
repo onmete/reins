@@ -133,6 +133,7 @@ operating context.
 | Skills (`SKILL.md`)    | On demand (progressive) | Workflow-specific constraints + procedures |
 | Linters / CI           | At validation time  | Mechanical enforcement              |
 | Structural tests       | At validation time  | Architectural invariants            |
+| Agent teams (IDE-native) | On spawn          | Parallel orchestration, peer review, file ownership |
 | Programmatic backend   | At runtime          | Deterministic orchestration         |
 
 This reframes the relationship between skills and harnesses. Skills
@@ -351,7 +352,9 @@ Areas that AI-SDLC could adopt or adapt:
 2. **Agent-to-agent review.** OpenAI pushes almost all review to
    agent-to-agent. AI-SDLC's Loop 3 is human review. The harness
    engineering model suggests agent review as the norm, with human
-   review as escalation.
+   review as escalation. Claude Code agent teams make this concrete:
+   a QA teammate with fresh context reviewing developer agents' work
+   before the human ever sees it.
 
 3. **Observability as agent input.** Agents querying logs via LogQL,
    metrics via PromQL, traces via TraceQL. Agents that can boot the
@@ -431,6 +434,7 @@ analysis, financial reports.
 | Specialized          | Fixed-phase pipeline for a domain workflow      | Contract review  |
 | Autonomous           | Event-triggered, self-directed agents           | OpenClaw         |
 | Hierarchical         | Supervisor orchestrating sub-agents             | Stripe Minions   |
+| Team                 | Parallel peers with shared task list + messaging| Claude Code teams|
 | DAG                  | Graph-based with branching and parallel exec    | Complex pipelines|
 
 ### Key Design Principles from the Demo
@@ -490,6 +494,123 @@ From the video's framework:
     comparison)
 12. Agent skills (expandable capabilities within the harness)
 
+## Agent Teams (IDE-Native Multi-Agent Orchestration)
+
+Claude Code (Mar 2026) introduced agent teams — an experimental feature
+for spawning multiple parallel agents within the IDE runtime. This sits
+between convention harnesses and programmatic harnesses: the
+orchestration is built into the agent runtime, but the behavior is
+shaped by convention (prompts, file ownership rules, skills).
+
+### How Agent Teams Work
+
+The main Claude Code session acts as a **team lead**. It creates
+teammate agents that:
+
+- Run in parallel, each with their own context window
+- Share a **task list** managed by the team lead
+- Can **message each other directly** (peer-to-peer, not just through
+  the orchestrator)
+- Inherit permissions, MCP servers, and skills from the main session
+- Have no conversation history — they only know what the team lead
+  tells them at spawn time
+
+This is distinct from sub-agents, which work independently and return
+results to the main agent. Agent teams enable feedback loops: a QA
+agent can reject a developer agent's work and send it back directly.
+
+### Agent Teams vs. Sub-Agents
+
+| Dimension            | Sub-Agents                   | Agent Teams                    |
+|----------------------|------------------------------|--------------------------------|
+| Communication        | Report to main only          | Peer-to-peer + main            |
+| Work pattern         | Sequential / isolated        | Parallel / collaborative       |
+| Shared state         | None                         | Shared task list               |
+| Context              | Fresh, scoped by main        | Fresh, scoped by main          |
+| Best for             | Focused single-result tasks  | Multi-specialty parallel work  |
+| Cost                 | 1 extra session per call     | N sessions running concurrently|
+
+### Prompting Pattern
+
+Effective agent team prompts follow a structure:
+
+1. **Goal** — what the team is collectively building (agents wake up
+   with no context; the goal orients them)
+2. **Team definition** — number of agents, model tier (Haiku/Sonnet/
+   Opus), named roles
+3. **Per-agent spec** — responsibilities, files owned, deliverables,
+   who to message when done
+4. **Communication flow** — explicit: "when done, message the QA
+   agent," "wait for backend's API before starting"
+5. **Final deliverables** — what the main agent should collect and
+   present to the human
+
+### Key Constraints
+
+- **File ownership** — each agent edits only its own files. Without
+  this, agents overwrite each other's work. This is an architectural
+  constraint (Pillar 2) enforced by convention in the prompt.
+- **3-5 teammates max** — N agents ≈ N× cost. Larger swarms increase
+  cost without proportional quality gains.
+- **Explicit recipients** — agents don't infer who to talk to. Name
+  the recipient in the prompt or messages go nowhere.
+- **Full context upfront** — no history is carried over. Everything
+  the agent needs must be in its spawn prompt or readable from the
+  project.
+
+### Plan Approval Mode
+
+Agent teammates can be required to **plan first** and get approval
+before executing. The approver can be:
+
+- The main agent (automated gate)
+- The human (manual gate)
+- A designated reviewer teammate
+
+This maps directly to AI-SDLC's Loop 1→Loop 2 gate: plan, get
+approval, then implement. The difference is that the gate happens
+per-agent rather than per-story.
+
+### Visibility and Human Oversight
+
+In a tmux terminal, each agent gets its own pane — the human can
+watch all agents think and work simultaneously. The human can also
+message any individual agent, not just the orchestrator. This supports
+the "CEO of your backlog" model: the engineer supervises a team of
+agents rather than delegating blindly.
+
+### Clean Shutdown Protocol
+
+The main agent sends shutdown requests to teammates. Each teammate
+can **refuse** if it hasn't finished saving work. Only when all
+confirm ready does the session close. This prevents work loss from
+force-killing agents mid-task — a small but important reliability
+detail.
+
+### Relevance to AI-SDLC
+
+Agent teams operationalize several AI-SDLC concepts within Claude
+Code's native feature set:
+
+| AI-SDLC Concept              | Agent Team Implementation              |
+|------------------------------|----------------------------------------|
+| Loop 1 gate (plan approval)  | Plan approval mode per teammate        |
+| Loop 2 (implement + review)  | Parallel dev agents + QA agent loop    |
+| Adherence assessment         | Separate QA agent with fresh context   |
+| File ownership boundaries    | Per-agent file assignment in prompt     |
+| Human as supervisor          | Tmux split-pane, individual messaging  |
+
+The QA agent pattern is particularly relevant: rather than the
+implementing agent self-scoring its own adherence (grading its own
+homework), a separate QA agent with a fresh context window reviews
+the work independently. This is a stronger verification signal.
+
+For the Stage 1 local POC, agent teams are available today with a
+single environment variable. A `reins-team-implement` skill could
+encode the team structure (frontend + backend + QA), file ownership
+rules, communication flow, and plan approval mode — delivering
+AI-SDLC's workflow through Claude Code's native orchestration.
+
 ## Implications for AI-SDLC
 
 The specialized harness pattern maps directly to AI-SDLC's three-loop
@@ -539,3 +660,9 @@ sub-agents with only the relevant context injected.
   contract review harness. Covers March of Nines reliability framing,
   sub-agent context isolation, model routing, state management, and
   12 design considerations for agent harnesses.
+- [Master 95% of Claude Code Agent Teams in 16 Mins](https://www.youtube.com/watch?v=vDVSGVpB2vc)
+  — Nate Herk (Mar 23, 2026). Practical walkthrough of Claude Code's
+  agent teams feature. Covers team setup, prompting patterns (goal →
+  roles → communication flow → deliverables), agent teams vs.
+  sub-agents, file ownership, plan approval mode, tmux visibility,
+  clean shutdown protocol, and when to use teams vs. sub-agents.
