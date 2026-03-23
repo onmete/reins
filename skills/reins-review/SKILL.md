@@ -202,6 +202,11 @@ Omit if no drift.
 - **Be honest on quality** — only flag real concerns. Zero
   quality issues is a good review, not an incomplete one.
 - **Evidence-based** — every score and issue needs a reason.
+- **PR comments are mandatory** — the local review file is
+  not a substitute. Every finding must be posted on the PR
+  via `gh` before writing the local file. If `gh` fails,
+  report the failure to the user instead of silently
+  continuing with only the local file.
 - **Max 2 rounds** — round 2 is the final AI review.
   Anything remaining goes to the human reviewer.
 - **Signature** — every PR comment ends with `— reins`.
