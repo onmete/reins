@@ -23,15 +23,23 @@ Create a pull request for an implemented story.
 
 ## Step 2: Compose PR Description
 
-Check for `.github/PULL_REQUEST_TEMPLATE.md` (or templates
-in `.github/PULL_REQUEST_TEMPLATE/`). If a template exists,
-use it as the structure and fill it in with the plan's
-content. If no template exists, use the default format below.
-
 Also check `.github/CONTRIBUTING.md` for any PR guidelines
 (title format, label requirements, etc.) and follow them.
 
-Read the plan and build the PR description:
+### When a repo template exists
+
+Check for `.github/PULL_REQUEST_TEMPLATE.md` (or templates
+in `.github/PULL_REQUEST_TEMPLATE/`). If found, use it
+**verbatim** as the skeleton — keep every section heading,
+checkbox, and placeholder. Fill in the plan's content within
+the template's sections. Do NOT add, remove, or rename
+sections. Map the plan content to the closest template
+section (approach → Description, ACs → Description or
+Testing, etc.).
+
+### When no repo template exists
+
+Use this default format:
 
 ```markdown
 ## {summary from plan}
