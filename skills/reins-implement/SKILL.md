@@ -64,7 +64,7 @@ Implementation complete for {story_id}.
 - {N} files modified, {M} files created
 - Tests: {pass/fail summary}
 
-When ready: /reins-review {story_id}
+When ready: /reins-raise-pr {story_id}
 ```
 
 If tests fail, report which tests and why. Do not silently

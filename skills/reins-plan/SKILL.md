@@ -87,6 +87,7 @@ summary: {one-line summary}
 status: draft
 scope: small | medium | large
 risk: low | medium | high
+pr:  # added by /reins-raise-pr
 files:
   - path: {relative path}
     action: create | modify
