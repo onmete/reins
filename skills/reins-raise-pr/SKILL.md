@@ -69,6 +69,21 @@ PRs, note which PR this is and what it covers.
 
 ## Step 3: Create the PR
 
+### Detect the target repository
+
+PRs must target the canonical (upstream) repository, not
+the user's fork:
+
+1. Run `git remote -v` and look for a remote named
+   `upstream`. If found, pass `--repo {upstream_owner/repo}`
+   to `gh pr create`.
+2. If no `upstream` remote exists, fall back to `origin`.
+
+Never pass `--repo` pointing at the user's fork when an
+`upstream` remote is configured.
+
+### Create
+
 Use `gh pr create` with the composed title and description.
 Use the plan's summary as the PR title.
 
