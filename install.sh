@@ -2,30 +2,26 @@
 set -euo pipefail
 
 REINS_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET="${1:?Usage: ./install.sh /path/to/target/repo [cursor|claude]}"
-RUNTIME="${2:-cursor}"
-TARGET="$(cd "$TARGET" && pwd)"
+RUNTIME="${1:-cursor}"
 
 case "$RUNTIME" in
     cursor)
-        SKILLS_DEST="$TARGET/.cursor/skills"
+        SKILLS_DEST="$HOME/.cursor/skills"
         ;;
     claude)
-        SKILLS_DEST="$TARGET/.claude/skills"
+        SKILLS_DEST="$HOME/.claude/skills"
         ;;
     *)
         echo "Unknown runtime: $RUNTIME"
-        echo "Supported: cursor, claude"
+        echo "Usage: ./install.sh [cursor|claude]"
         exit 1
         ;;
 esac
 
-echo "Installing Reins skills into: $TARGET"
+echo "Installing Reins skills globally"
 echo "Runtime: $RUNTIME → $SKILLS_DEST"
 
 mkdir -p "$SKILLS_DEST"
-mkdir -p "$TARGET/.reins/plans"
-mkdir -p "$TARGET/.reins/reviews"
 
 for skill_dir in "$REINS_DIR/skills/reins-"*/; do
     [ -d "$skill_dir" ] || continue
@@ -43,6 +39,5 @@ for skill_dir in "$REINS_DIR/skills/reins-"*/; do
 done
 
 echo ""
-echo "Done. Skills copied to $SKILLS_DEST"
-echo "Skill edits in the target repo show up in git diff."
+echo "Done. Skills installed globally to $SKILLS_DEST"
 echo "Re-run to push updated skills from source."

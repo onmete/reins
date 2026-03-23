@@ -31,8 +31,7 @@ etc.). Everything works across local agent runtimes.
 ## What We're Building
 
 - Agent skills (`skills/`) for each workflow loop, installed
-  into the target repo's runtime-specific directory via
-  `install.sh`
+  globally via `install.sh`
 - Prompt templates embedded in the skills
 - Plan format (YAML frontmatter + markdown sections)
 - Adherence assessment format and scoring criteria
@@ -563,10 +562,9 @@ Developer Experience section above for the interaction model.
 - Create `skills/reins-plan/SKILL.md` (skeleton)
 - Create `skills/reins-retro/SKILL.md` (skeleton)
 - Create `.reins/` directory structure (plans, reviews)
-- Install into target repo via `install.sh`
+- Install globally via `install.sh`
 
-**Done when:** skill files exist and `.reins/` directory is set
-up in the target repo.
+**Done when:** skill files exist in `~/.cursor/skills/`.
 
 ### Step 1: Plan Skill + Retro Skill
 

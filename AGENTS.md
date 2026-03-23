@@ -23,7 +23,7 @@ docs/
 skills/
   reins-plan/SKILL.md        — Plan generation skill
   reins-retro/SKILL.md       — Feedback capture and skill improvement
-install.sh                   — Install skills into target repo
+install.sh                   — Install skills globally (~/.cursor/skills)
 README.md                    — Project overview
 ```
 
