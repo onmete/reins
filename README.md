@@ -72,10 +72,13 @@ An interactive walkthrough of the three-loop workflow
 (Plan → Implement → Review):
 
 ```bash
+# Open directly in your browser
 open demo/loop1-plan-flow.html
-```
 
-No server required — it's a self-contained HTML file.
+# Or serve locally (needed for embedded browsers that block file://)
+cd demo && python3 -m http.server 8765
+# then visit http://localhost:8765/loop1-plan-flow.html
+```
 
 ## Status
 
