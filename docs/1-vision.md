@@ -82,6 +82,58 @@ Enterprise adoption of a BDD-only approach is premature, but as a design
 direction it aligns with the broader shift from code as the primary artifact
 toward verification and outcomes.
 
+## Code as Disposable Artifact
+
+If the harness is strong enough — tests pass, linters pass, architectural
+constraints are enforced mechanically — then the human reviewing
+implementation line-by-line adds latency without proportional safety. The
+logical shift: **review the behavior contract, not the code.**
+
+This has organizational consequences. Teams that review only behavior
+definitions and test suites instead of code+tests get a measurable speedup
+across the entire SDLC. When some teams visibly ship faster with equal or
+better quality, management asks why others can't. Over time, there is
+pressure to adopt behavior-only review where the risk profile allows it.
+
+The adoption gradient is predictable: success correlates inversely with
+project size, complexity, and risk. A stateless API gateway? Review only
+the OpenAPI spec and test suite. A payment service handling PCI-scoped
+data? Human reviews every line.
+
+### The Microservices Renaissance
+
+This pressure creates an architectural incentive. If behavior-only review
+works best for small, well-bounded services, teams will decompose systems
+to fit. Microservices — which fell partially out of favor due to
+operational complexity — become attractive again for different reasons:
+
+- **Hard boundaries.** The network enforces architectural constraints,
+  not convention. An agent can't accidentally reach across a service
+  boundary the way it can reach across a module boundary.
+- **Limited blast radius.** If AI-generated code has subtle issues, the
+  damage is contained to one small service, not a monolith.
+- **Full-context reasoning.** A 2K-line microservice fits entirely in a
+  context window. The agent reasons about the whole thing. A 200K-line
+  monolith forces partial views, inconsistent changes, and entropy
+  accumulation.
+- **Regeneration over refactoring.** When a small service accumulates
+  entropy, you can regenerate it from the behavior spec rather than
+  patch it. Garbage collection taken to its logical extreme.
+- **AI handles the original objection.** The case against microservices
+  was operational complexity — too many services, too much boilerplate,
+  distributed systems headaches. These are exactly what AI agents
+  handle well: scaffolding, wiring, repetitive patterns. Kubernetes
+  and service meshes handle the operational side.
+
+The unit of human ownership shifts from "code" to "contract." You own the
+API spec, the test suite, the architectural constraints, the deployment
+topology. The implementation behind those contracts becomes as disposable
+as a CI build artifact — regenerable from the spec if needed.
+
+This is speculative but directional. The stronger the harness becomes, the
+less the implementation matters, and the more the architecture must support
+safe disposability.
+
 ## Lessons at the End of Each Session
 
 Every workflow execution should produce a feedback loop: what worked, what
