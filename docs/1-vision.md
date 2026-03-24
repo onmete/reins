@@ -134,6 +134,68 @@ This is speculative but directional. The stronger the harness becomes, the
 less the implementation matters, and the more the architecture must support
 safe disposability.
 
+## The Symmetry of Displacement
+
+A common framing: "AI will replace engineers." But displacement is
+symmetric. If AI is capable enough to replace most of the engineering
+workforce in a corporation, then those same engineers — now armed with
+the same AI — can replace the corporation. A single engineer with a
+strong harness can build what previously required a team of twenty.
+
+This has two consequences:
+
+**Competition increases everywhere.** The barrier to building software
+products drops to near zero. Domain expertise and distribution become
+the only defensible moats — the implementation is commoditized. Every
+market segment gets more entrants, faster.
+
+**The SaaS oligopoly erodes.** This is already visible. The industry
+calls it the "SaaSpocalypse" — $1-2 trillion in SaaS market value
+wiped out since January 2026. Salesforce stock dropped 26% YTD with
+organic growth slowing to high single digits. Atlassian reported its
+first-ever decline in enterprise seat count. Adobe fell ~30%. Per-seat
+pricing adoption dropped from 21% to 15% in twelve months, with 70%
+of enterprises now demanding usage-based or outcome-based contracts.
+
+The trigger: AI agents that can do the work of 5-15 human users break
+the per-seat pricing model. Morgan Stanley noted the structural threat
+explicitly: "The rise of AI agents that can operate enterprise software
+autonomously poses a structural threat to per-seat SaaS pricing
+models." Mid-size companies are acting on this — startup Atonom
+replaced a $40K/year Salesforce contract with an AI-built internal CRM
+costing $1,200/year, handling lead capture, pipeline tracking, and
+reporting with better customization than the off-the-shelf product.
+
+The economics have flipped: when implementation cost was high, buying
+made sense. When implementation cost approaches zero, the SaaS tax —
+paying for features you don't use, integrations you don't need, and
+a vendor's margin — becomes harder to justify.
+
+The implications for engineering organizations:
+
+- **Retention matters more, not less.** Engineers who leave don't
+  just take domain knowledge — they take the ability to rebuild your
+  product in weeks, not years. The "replaced by AI" engineer is now
+  a potential competitor.
+- **Harness as institutional knowledge.** The harness — behavior
+  specs, architectural constraints, test suites, deployment
+  topology — encodes decisions that took years to learn. This
+  becomes the durable asset, not the codebase. An engineer can
+  regenerate code; they can't easily regenerate the accumulated
+  judgment in a well-designed harness.
+- **Small teams become viable at larger scale.** OpenAI's proof
+  point (3→7 engineers, ~1M lines of code) is the early signal.
+  The question is not whether small teams can build large systems
+  with AI, but how small. This changes hiring math, org structure,
+  and the economics of starting a company.
+
+None of this means engineers become unnecessary. It means the
+*scarcity* shifts: from people who can write code to people who can
+define what should be built, design systems that constrain AI
+effectively, and evaluate whether the output is correct. The CEO of
+your backlog framing is not just a workflow improvement — it's a
+description of the engineer's durable value.
+
 ## Lessons at the End of Each Session
 
 Every workflow execution should produce a feedback loop: what worked, what
