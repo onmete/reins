@@ -90,7 +90,20 @@ Compare files actually modified against the plan's `files:`
 frontmatter. Flag planned-but-untouched files and unplanned
 modifications. Omit if no drift.
 
-## Step 6: Post on PR and Write Local Review
+## Step 6: Compute Score
+
+Start at 100 and deduct:
+
+- **−15** per FAIL AC
+- **−5** per NEEDS_REVIEW AC
+- **−10** per must-fix quality issue
+- **−3** per should-fix quality issue
+- **−5** for scope drift (any unplanned files modified)
+
+Floor at 0. The score represents confidence that the PR is
+ready to merge without further changes.
+
+## Step 7: Post on PR and Write Local Review
 
 ### Post PR review via `gh`
 

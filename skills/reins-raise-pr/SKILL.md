@@ -85,7 +85,9 @@ Never pass `--repo` pointing at the user's fork when an
 ### Create
 
 Use `gh pr create` with the composed title and description.
-Use the plan's summary as the PR title.
+If the plan's `story_id` looks like a Jira ID (e.g. `OLS-2673`),
+use `{story_id}: {summary}` as the PR title. Otherwise use the
+plan's summary alone.
 
 After creation, update the plan's YAML frontmatter with the
 PR URL:

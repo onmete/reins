@@ -13,6 +13,10 @@ Run the full reins workflow for a story in a single
 conversation. The developer approves the plan, then
 everything else runs automatically.
 
+If plan refinement is lengthy, use `/reins-plan` and
+`/reins-deliver` instead — they split planning from
+delivery so each gets a clean context.
+
 ## Invocation
 
 `/reins-work-on {story_id or story content}`
