@@ -23,6 +23,10 @@ Read the plan from `.reins/plans/{story_id}.md`. If the plan
 doesn't exist, stop and tell the user to run `/reins-plan`
 first.
 
+Also read `.reins/specs/{story_id}.md` if it exists — the
+spec provides clarified requirements and edge cases that
+inform implementation decisions.
+
 ## Phase 1: Implement
 
 Follow the `/reins-implement` instructions:

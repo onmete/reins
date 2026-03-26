@@ -52,6 +52,16 @@ of producing a plan. Tell the user what's wrong and suggest
 how to fix the story (split it, add AC, reclassify as spike,
 etc.). This is more valuable than a plan for a bad story.
 
+## Step 1.5: Check for Spec
+
+If `.reins/specs/{story_id}.md` exists, read it and use the
+clarified requirements, edge cases, and constraints as input
+to the plan. The spec replaces the raw story AC — plan
+against the spec, not the original story text.
+
+If no spec exists, proceed with the raw story AC (the spec
+step is optional for clear, well-scoped stories).
+
 ## Step 2: Plan
 
 Explore the codebase to understand what the story touches.
@@ -76,6 +86,59 @@ After writing, print the plan and tell the user:
 ```
 Note: Planning works best with a capable model (not fast).
 Review the plan. When ready: /reins-implement {story_id}
+```
+
+## Step 3: ADR (if applicable)
+
+If the plan involves a **non-obvious architectural decision**
+— choosing between meaningful alternatives with different
+trade-offs — write an ADR to `.reins/adrs/{story_id}-{slug}.md`.
+
+Only create an ADR when:
+
+- There were genuine alternatives considered
+- The choice has lasting consequences (not easily reversed)
+- Future engineers would ask "why did we do it this way?"
+
+Do NOT create ADRs for routine implementation choices.
+
+### ADR Format
+
+```markdown
+# {Decision Title}
+
+Date: {YYYY-MM-DD}
+Story: {story_id}
+Status: proposed
+
+## Context
+
+What is the situation that requires a decision? What forces
+are at play? 2-4 sentences.
+
+## Decision
+
+What is the change we are proposing or have agreed to?
+
+## Alternatives Considered
+
+### {Alternative A}
+- **Pros:** ...
+- **Cons:** ...
+
+### {Alternative B}
+- **Pros:** ...
+- **Cons:** ...
+
+## Consequences
+
+What becomes easier or harder as a result of this decision?
+```
+
+After writing, mention the ADR in the plan output:
+
+```
+ADR written to .reins/adrs/{story_id}-{slug}.md
 ```
 
 ## Plan Format

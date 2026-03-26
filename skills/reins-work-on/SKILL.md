@@ -24,15 +24,36 @@ delivery so each gets a clean context.
 Accepts the same story input as `/reins-plan` — pasted
 content, file reference, or Jira ID.
 
-## Phase 1: Plan
+## Phase 1: Spec
+
+Follow the `/reins-spec` instructions:
+
+1. Assess readiness (AC present? bounded scope? right type?)
+2. Explore context in the codebase
+3. Clarify each AC (edge cases, implicit requirements,
+   ambiguity, dependencies, conflicts)
+4. Write the spec to `.reins/specs/{story_id}.md`
+5. Print the spec
+
+If the spec's readiness is "needs-clarification", present the
+open questions and wait for answers. Update the spec and
+re-assess until readiness is "ready".
+
+For clear, well-scoped stories this phase is fast — the spec
+confirms requirements are complete and moves on.
+
+## Phase 2: Plan
 
 Follow the `/reins-plan` instructions:
 
-1. Evaluate the story (AC present? well-scoped? spike or
-   implementation?)
-2. Explore the codebase
-3. Write the plan to `.reins/plans/{story_id}.md`
-4. Print the plan
+1. Check for spec (reads `.reins/specs/{story_id}.md` if it
+   exists)
+2. Evaluate the story
+3. Explore the codebase
+4. Write the plan to `.reins/plans/{story_id}.md`
+5. Write ADR to `.reins/adrs/` if an architectural decision
+   was made
+6. Print the plan
 
 ### Checkpoint: Plan Approval
 
@@ -50,7 +71,7 @@ and re-print the plan. Loop until approved or stopped.
 
 Do NOT proceed past this point without explicit approval.
 
-## Phase 2: Implement
+## Phase 3: Implement
 
 Follow the `/reins-implement` instructions:
 
@@ -58,7 +79,7 @@ Follow the `/reins-implement` instructions:
 2. Implement each AC with tests
 3. Run linting, type checks, and tests
 
-## Phase 3: Raise PR
+## Phase 4: Raise PR
 
 Follow the `/reins-raise-pr` instructions:
 
@@ -66,7 +87,7 @@ Follow the `/reins-raise-pr` instructions:
 2. Compose PR description from the plan
 3. Create PR via `gh`, store URL in plan frontmatter
 
-## Phase 4: Self-Review (Round 1)
+## Phase 5: Self-Review (Round 1)
 
 Follow the `/reins-review` instructions:
 
@@ -78,7 +99,7 @@ Follow the `/reins-review` instructions:
 
 If all ACs pass and no quality issues, skip to the end.
 
-## Phase 5: Fix (if review found issues)
+## Phase 6: Fix (if review found issues)
 
 Follow the `/reins-fix` instructions:
 
@@ -87,7 +108,7 @@ Follow the `/reins-fix` instructions:
 3. Reply to PR comments
 4. Push fixes
 
-## Phase 6: Self-Review (Round 2 — Final)
+## Phase 7: Self-Review (Round 2 — Final)
 
 Follow the `/reins-review` instructions for round 2:
 

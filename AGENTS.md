@@ -21,7 +21,8 @@ docs/
   5-references.md            — Source material and prior art
   6-plan-local-agent.md      — Stage 1 plan (local agent skills)
 skills/
-  reins-plan/SKILL.md        — Plan generation skill
+  reins-spec/SKILL.md        — Requirements spec from a story
+  reins-plan/SKILL.md        — Implementation plan (+ optional ADR)
   reins-retro/SKILL.md       — Feedback capture and skill improvement
 install.sh                   — Install skills globally (~/.cursor/skills)
 README.md                    — Project overview
