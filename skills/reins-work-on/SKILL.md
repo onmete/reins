@@ -26,7 +26,7 @@ content, file reference, or Jira ID.
 
 ## Phase 1: Spec
 
-Follow the `/reins-spec` instructions:
+Follow the `/reins-story-spec` instructions:
 
 1. Assess readiness (AC present? bounded scope? right type?)
 2. Explore context in the codebase

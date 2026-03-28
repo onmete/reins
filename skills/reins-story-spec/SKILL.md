@@ -1,13 +1,14 @@
 ---
-name: reins-spec
+name: reins-story-spec
 description: >-
   Produce a structured requirements spec from a story. Reads the
   story, assesses clarity, surfaces ambiguities, and writes a
-  spec to .reins/specs/. Use when the user says "spec",
-  "reins-spec", or wants to clarify requirements before planning.
+  spec to .reins/specs/. Use when the user says "story spec",
+  "reins-story-spec", or wants to clarify requirements before
+  planning.
 ---
 
-# reins-spec
+# reins-story-spec
 
 Produce a structured requirements specification from a story.
 Do NOT plan implementation — this is about what to build, not
@@ -18,8 +19,8 @@ how to build it.
 The user provides a story in one of these forms:
 
 1. **Pasted content** — story text directly in the conversation
-2. **File reference** — `/reins-spec .reins/stories/ID.md`
-3. **Jira ID** — `/reins-spec OLS-42` (requires Jira CLI or
+2. **File reference** — `/reins-story-spec .reins/stories/ID.md`
+3. **Jira ID** — `/reins-story-spec OLS-42` (requires Jira CLI or
    MCP; fall back to asking the user to paste if unavailable)
 
 Extract the **story ID**, **summary**, and **acceptance

@@ -21,7 +21,10 @@ docs/
   5-references.md            — Source material and prior art
   6-plan-local-agent.md      — Stage 1 plan (local agent skills)
 skills/
-  reins-spec/SKILL.md        — Requirements spec from a story
+  reins-feature-spec/SKILL.md — Feature specification (+ ADRs)
+  reins-decompose/SKILL.md   — Feature → Epics + Stories in Jira
+  reins-spike/SKILL.md       — Time-boxed research → ADR
+  reins-story-spec/SKILL.md  — Requirements spec from a story
   reins-plan/SKILL.md        — Implementation plan (+ optional ADR)
   reins-retro/SKILL.md       — Feedback capture and skill improvement
 install.sh                   — Install skills globally (~/.cursor/skills)
@@ -46,4 +49,5 @@ README.md                    — Project overview
   diffs
 - Prefer concrete examples over abstract descriptions
 - CLI tool name is `reins`, Python package is `reins`
-- Artifacts directory is `.reins/` (stories, runs)
+- Artifacts directory is `.reins/` (feature-specs, specs, plans,
+  adrs, reviews)
