@@ -5,11 +5,15 @@ relationship to the AI-SDLC design.
 
 ## Origin
 
-The term was coined by OpenAI in a February 2026 blog post by Ryan Lopopolo
-("Harness engineering: leveraging Codex in an agent-first world"). It
-describes the discipline that emerged from a five-month experiment where a
-small team (3→7 engineers) built and shipped a beta product with ~1 million
-lines of code and zero manually-written lines, using Codex agents exclusively.
+The term originates from Mitchell Hashimoto's blog post ("My AI Adoption
+Journey," Step 5: Engineer the Harness) and was subsequently popularized by
+OpenAI in a February 2026 blog post by Ryan Lopopolo ("Harness engineering:
+leveraging Codex in an agent-first world"). As Birgitta Böckeler notes on
+martinfowler.com, OpenAI's formal coining "was maybe an afterthought inspired
+by" Hashimoto's earlier usage. The OpenAI post describes the discipline that
+emerged from a five-month experiment where a small team (3→7 engineers) built
+and shipped a beta product with ~1 million lines of code and zero
+manually-written lines, using Codex agents exclusively.
 
 The metaphor is borrowed from horse tack — reins, saddle, bit — equipment
 for channeling a powerful but unpredictable animal in the right direction:
@@ -634,6 +638,9 @@ sub-agents with only the relevant context injected.
 
 ## Primary Sources
 
+- [My AI Adoption Journey](https://mitchellh.com/writing/my-ai-adoption-journey#step-5-engineer-the-harness)
+  — Mitchell Hashimoto. Step 5 ("Engineer the Harness") introduces the
+  harness concept for AI coding agents, predating OpenAI's formal coining.
 - [Harness engineering: leveraging Codex in an agent-first world](https://openai.com/index/harness-engineering/)
   — Ryan Lopopolo, OpenAI Engineering Blog (Feb 11, 2026). The
   original post. Detailed account of building a product with zero
