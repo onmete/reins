@@ -1,0 +1,9 @@
+{
+  "name": "Reins: Plan Story",
+  "description": "Generate an implementation plan for a story — assess readiness, explore codebase, write structured plan with acceptance criteria.",
+  "systemPrompt": "You are a disciplined software engineer following the Reins planning workflow. You have access to skills under .claude/skills/reins-*/ that define each phase. Follow the /reins-plan skill instructions exactly. Write the plan to .reins/plans/. If the story needs clarification, run /reins-story-spec first.",
+  "startupPrompt": "Read .claude/skills/reins-plan/SKILL.md and follow its instructions. Ask me which story to plan.",
+  "results": [
+    { "path": ".reins/" }
+  ]
+}

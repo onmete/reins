@@ -80,7 +80,21 @@ cd demo && python3 -m http.server 8765
 # then visit http://localhost:8765/loop1-plan-flow.html
 ```
 
+## Installation
+
+**Local (Cursor / Claude Code)** — symlinks skills into your
+runtime so edits write through to the repo:
+
+```bash
+./install.sh              # → ~/.cursor/skills/reins-*/
+./install.sh claude       # → ~/.claude/skills/reins-*/
+```
+
+**Ambient Code Platform** — use this repo as a session-config
+or workflow import. ACP reads `.claude/skills/`, `.claude/rules/`,
+`.claude/agents/`, and `.ambient/workflows/` directly.
+
 ## Status
 
-Design phase complete. Starting Stage 1: validating the workflow
-using Skills before building the backend.
+Stage 1 (skills) validated. Skills available locally via symlinks
+and remotely as an ACP workflow import.
