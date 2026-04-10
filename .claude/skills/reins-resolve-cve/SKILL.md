@@ -59,31 +59,20 @@ project = OLS AND type = Vulnerability
 Use `acli jira workitem search` with `--json` and
 `--fields "key,summary,assignee,priority,status"`.
 
-The summary encodes the component:
-`CVE-YYYY-NNNNN openshift-lightspeed/{component}: {Package}: {Title} [ols-N]`
-
-Known components (extract from the summary path after
-`openshift-lightspeed/`):
-
-| Component slug | Repository |
-|----------------|------------|
-| `lightspeed-service-api-rhel9` | lightspeed-service |
-| `lightspeed-operator*` | lightspeed-operator |
-| `lightspeed-console*` | lightspeed-console-plugin |
+The summary encodes the component slug after
+`openshift-lightspeed/` (or `openshift-lightspeed-tech-preview/`).
+Extract the component from each summary and group results
+by component.
 
 Present a grouped table:
 
 ```
 CVEs in current sprint ({N} total, {M} unassigned):
 
-lightspeed-service ({count})
-  {KEY}  {CVE-ID}  {package}  {priority}  {assignee or "—"}
+{component-a} ({count})
   {KEY}  {CVE-ID}  {package}  {priority}  {assignee or "—"}
 
-lightspeed-operator ({count})
-  {KEY}  ...
-
-(other / unknown) ({count})
+{component-b} ({count})
   {KEY}  ...
 ```
 
@@ -91,26 +80,31 @@ Then ask:
 
 ```
 Options:
-  {ISSUE-KEY} — pick a CVE to resolve
-  stop        — done
+  {ISSUE-KEY}        — pick a single CVE to resolve
+  {KEY}, {KEY}, ...  — pick multiple CVEs to resolve sequentially
+  stop               — done
 ```
 
-**Wait for the user to pick.** Then proceed to Step 1 with
-the chosen issue.
+**Wait for the user to pick.** If the user selects
+multiple CVEs, resolve them sequentially — run Steps 1-5
+for each, completing one before starting the next. If
+multiple CVEs target the same package, share a single bump
+and reference all CVE IDs in the Jira comments.
 
 ## Step 1: Read the CVE Issue
 
 Fetch the issue via
 `acli jira workitem view {KEY} --json`.
 
-Parse the data from these locations:
+Parse the data from the JSON response:
 
 - **CVE ID** — embedded in the `summary` field, e.g.,
   `CVE-2026-33231 openshift-lightspeed/...: NLTK: ...`
-- **Affected package** — mentioned in the description's
-  `Flaw:` section (the description starts with boilerplate
-  — "Security Tracking Issue", "Do not make this issue
-  public" — skip to the flaw text after the `---` separator)
+- **Affected package** — in the `description` field.
+  The description is Atlassian Document Format (JSON).
+  Skip the boilerplate paragraphs ("Security Tracking
+  Issue", "Do not make this issue public") and the `rule`
+  node (horizontal separator). The flaw text follows.
 - **Vulnerable version range** — in the flaw prose
 - **Fix reference** — upstream commit or PR link, if
   mentioned in the flaw text
@@ -126,14 +120,14 @@ is unclear from the flaw text, ask the user to clarify.
 ## Step 2: Assess Impact
 
 Before checking versions, understand how this repo manages
-dependencies. Look for repo-specific context in:
-- `.cursor/rules/`, CLAUDE.md, AGENTS.md
-- `.cursor/commands/` (e.g., update-deps instructions)
-- `Makefile` targets related to requirements/dependencies
+dependencies. Look for repo-specific context in AGENTS.md, CLAUDE.md or makefile. These should describe the dependency tooling,
+how to bump packages, and which files represent the shipped
+versions.
 
-This tells you which files represent the shipped dependency
-versions (may differ from `uv.lock` — e.g., separately
-compiled requirements files for container builds).
+If neither file exists, stop and ask the user: the repo is
+missing dependency management context. Offer to continue
+with best-effort inference from the files present, or let
+the user provide the missing context first.
 
 Then determine whether this project is affected:
 
@@ -203,11 +197,12 @@ Based on the verdict and user acknowledgment:
 
 ### Path A: Not Affected
 
-1. Add a comment to the Jira issue:
+1. Ask the user to confirm the resolution and which Jira transition to use.
 
-   ```bash
-   acli jira workitem comment create --key {KEY} \
-     --body "**Assessment: Not Affected**
+2. Once approved, add a comment to the Jira issue:
+
+   ```
+   **Assessment: Not Affected**
 
    {CVE-ID} targets {package} versions {range}.
 
@@ -218,38 +213,37 @@ Based on the verdict and user acknowledgment:
    - The vulnerable code path ({specific API/module}) is
      not used by this project.
 
-   No action required."
+   No action required.
    ```
 
-2. Transition the issue to **Done**:
-
-   ```bash
-   acli jira workitem transition \
-     --key {KEY} --status "Done" --yes
-   ```
+3. Transition the issue via acli.
 
 ### Path B: Dependency Bump
 
-Check for repo-specific dependency update instructions
-(AGENTS.md, `.cursor/commands/`, `Makefile` targets). Use
-those to bump the affected package and regenerate any
-derived dependency files.
+1. Check for repo-specific dependency update instructions
+   (AGENTS.md, `.cursor/commands/`, `Makefile` targets).
+   Use those to bump the affected package and regenerate
+   any derived dependency files.
 
-Verify the new version is outside the vulnerable range in
-ALL files that ship to production (lock file, generated
-requirements/vendor files). If any file still contains the
-vulnerable version, investigate why — the generation
-process may need fixing. If the latest upstream release is
-still vulnerable, stop and tell the user — no fix is
-available yet.
+2. Verify the new version is outside the vulnerable range
+   in ALL files that ship to production (lock file,
+   generated requirements/vendor files). If any file still
+   contains the vulnerable version, investigate why — the
+   generation process may need fixing. If the latest
+   upstream release is still vulnerable, stop and tell the
+   user — no fix is available yet.
 
-Run the repo's verification gates — discover what checks
-to run from AGENTS.md, `.cursor/commands/`, or the
-Makefile (e.g., format, lint, type-check, unit tests).
+3. Run the repo's verification gates — discover what
+   checks to run from AGENTS.md, `.cursor/commands/`, or
+   the Makefile (e.g., format, lint, type-check, unit
+   tests).
 
-Then add a Jira comment with the CVE ID, old version, new
-version, and verification status. Ask the user about Jira
-transition — if approved, transition via acli.
+4. Ask the user to confirm the resolution and which Jira transition to use.
+
+5. Once approved, add a Jira comment with the CVE ID, old
+   version, new version, and verification status.
+
+6. Transition the issue via acli.
 
 ### Path C: Code Change (Rare)
 
@@ -295,18 +289,16 @@ fix: resolve {CVE-ID} — {brief description}
 - **Human gate is mandatory** — never act on the verdict
   without the user confirming the assessment. They may
   know things the codebase analysis cannot reveal.
-- **Jira transitions** — Path A (Not Affected) transitions
-  automatically to Done/Closed with resolution "Won't Do".
-  For Paths B and C, ask the user which transition to use.
-- **Minimal changes** — bump only the affected package,
-  not all dependencies.
+- **Jira transitions** — always ask the user before
+  transitioning. Do not transition automatically.
+- **Minimal changes** — prefer bumping only the affected
+  package. If the repo's instructions only support a
+  broader upgrade, ask the user whether to proceed with
+  the broader bump or do a targeted one manually.
 - **Verify after every change** — lint, types, and unit
   tests must pass before declaring done.
 - **Do not downplay severity** — if the project is
   affected, say so clearly. Do not stretch "not affected"
   reasoning to avoid work.
 - **Use acli** — all Jira operations go through the `acli`
-  CLI. If a command fails with an auth error, prompt the
-  user to run `acli auth login`. Use `--json` for
-  machine-readable output and `--yes` to skip interactive
-  confirmations on transitions.
+  CLI.
