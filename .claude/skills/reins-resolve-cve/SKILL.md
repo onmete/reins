@@ -22,8 +22,6 @@ dependency, or apply a code fix.
 |---------|-------|
 | Project key | `OLS` (OpenShift Lightspeed Service) |
 | Issue type | Vulnerability |
-| Lock file | `uv.lock` |
-| Dependency spec | `pyproject.toml` |
 
 ## Invocation
 
@@ -127,16 +125,29 @@ is unclear from the flaw text, ask the user to clarify.
 
 ## Step 2: Assess Impact
 
-Determine whether this project is affected:
+Before checking versions, understand how this repo manages
+dependencies. Look for repo-specific context in:
+- `.cursor/rules/`, CLAUDE.md, AGENTS.md
+- `.cursor/commands/` (e.g., update-deps instructions)
+- `Makefile` targets related to requirements/dependencies
 
-1. **Check if the package is a dependency** — search
-   `pyproject.toml` and `uv.lock` for the package name.
-   Match case-insensitively (Jira may say `NLTK`, lock
-   file has `nltk`). If not present at all, the project
-   is **not affected**.
+This tells you which files represent the shipped dependency
+versions (may differ from `uv.lock` — e.g., separately
+compiled requirements files for container builds).
+
+Then determine whether this project is affected:
+
+1. **Check if the package is a dependency** — search the
+   dependency spec, lock file, and any generated
+   requirements files for the package name. Match
+   case-insensitively. If the package is absent from all
+   of these, the project is **not affected**.
 2. **Check the installed version** — find the exact version
-   in `uv.lock`. Compare against the vulnerable version
-   range from the advisory.
+   in the lock file AND in any generated/compiled
+   dependency files. If they disagree, the files that ship
+   in the container are the ones that matter for the
+   vulnerability assessment. Compare against the
+   vulnerable version range from the advisory.
 3. **Check if the vulnerable code path is reachable** — if
    the CVE targets a specific feature or module of the
    package, search the codebase for imports and usage of
@@ -145,8 +156,9 @@ Determine whether this project is affected:
    is in range.
 4. **Check transitive dependencies** — if the package isn't
    a direct dependency, check whether it appears as a
-   transitive dependency in `uv.lock`. Trace which direct
-   dependency pulls it in.
+   transitive dependency in the lock file or the generated
+   dependency files. Trace which direct dependency pulls
+   it in.
 
 ## Step 3: Present Assessment
 
@@ -157,7 +169,7 @@ CVE Assessment: {CVE-ID}
 
 Package: {package name}
 Vulnerable versions: {range}
-Installed version: {version from uv.lock}
+Installed version: {version from lock / shipped requirements}
 Direct dependency: {yes/no — if no, pulled in by {parent}}
 
 Verdict: {NOT AFFECTED / AFFECTED — bump needed /
@@ -218,45 +230,26 @@ Based on the verdict and user acknowledgment:
 
 ### Path B: Dependency Bump
 
-Bump only the affected package:
+Check for repo-specific dependency update instructions
+(AGENTS.md, `.cursor/commands/`, `Makefile` targets). Use
+those to bump the affected package and regenerate any
+derived dependency files.
 
-```bash
-uv lock --upgrade-package {package}
-uv sync --group dev --extra evaluation
-make requirements.txt
-```
+Verify the new version is outside the vulnerable range in
+ALL files that ship to production (lock file, generated
+requirements/vendor files). If any file still contains the
+vulnerable version, investigate why — the generation
+process may need fixing. If the latest upstream release is
+still vulnerable, stop and tell the user — no fix is
+available yet.
 
-Verify the new version in `uv.lock` is outside the
-vulnerable range. If the latest release is still
-vulnerable, stop and tell the user — no fix is available
-upstream yet.
+Run the repo's verification gates — discover what checks
+to run from AGENTS.md, `.cursor/commands/`, or the
+Makefile (e.g., format, lint, type-check, unit tests).
 
-Run the verification gates:
-
-```bash
-make format
-make verify
-make test-unit
-```
-
-Then add a Jira comment:
-
-```bash
-acli jira workitem comment create --key {KEY} \
-  --body "**Resolution: Dependency bumped**
-
-{CVE-ID} targets {package} versions {range}.
-Bumped {package} from {old version} to {new version}.
-
-Lint/types/tests: passing."
-```
-
-Ask the user about Jira transition — if approved:
-
-```bash
-acli jira workitem transition \
-  --key {KEY} --status "Done" --yes
-```
+Then add a Jira comment with the CVE ID, old version, new
+version, and verification status. Ask the user about Jira
+transition — if approved, transition via acli.
 
 ### Path C: Code Change (Rare)
 
@@ -264,7 +257,7 @@ acli jira workitem transition \
    This is unusual — confirm the approach before
    implementing.
 2. Make the targeted fix, write or update tests, and run
-   `make verify && make check-types && make test-unit`.
+   the repo's verification gates.
 3. Add a Jira comment summarizing the code change.
 4. Ask the user about Jira transition.
 
@@ -306,8 +299,7 @@ fix: resolve {CVE-ID} — {brief description}
   automatically to Done/Closed with resolution "Won't Do".
   For Paths B and C, ask the user which transition to use.
 - **Minimal changes** — bump only the affected package,
-  not all dependencies. Use `--upgrade-package`, not
-  `--upgrade`.
+  not all dependencies.
 - **Verify after every change** — lint, types, and unit
   tests must pass before declaring done.
 - **Do not downplay severity** — if the project is
