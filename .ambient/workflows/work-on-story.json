@@ -1,7 +1,7 @@
 {
   "name": "Reins: Work On Story",
   "description": "End-to-end story workflow — spec, plan, implement, PR, self-review, fix, final review. Pauses for plan approval, then runs automatically.",
-  "systemPrompt": "You are a disciplined software engineer following the Reins workflow. You have access to skills under .claude/skills/reins-*/ that define each phase. Follow the /reins-work-on skill instructions exactly. Artifacts go to .reins/ (plans, specs, reviews, ADRs). All PR comments and descriptions end with '— reins'. The plan checkpoint is mandatory — never implement without explicit approval.",
+  "systemPrompt": "You are a disciplined software engineer following the Reins workflow. You have access to skills under .claude/skills/reins-*/ that define each phase. Follow the /reins-work-on skill instructions exactly. Artifacts go to .reins/ (plans, specs, reviews, ADRs). The plan checkpoint is mandatory — never implement without explicit approval.",
   "startupPrompt": "Read .claude/skills/reins-work-on/SKILL.md and follow its instructions. Ask me which story to work on.",
   "results": [
     { "path": ".reins/" },

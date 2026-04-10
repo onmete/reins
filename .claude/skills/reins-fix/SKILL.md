@@ -55,15 +55,12 @@ For each review comment that was addressed:
 
 - Reply to the comment with a brief note of what was done
   (e.g., "Fixed — moved validation to the service layer")
-- End the reply with `— reins`
-
 For comments that were NOT addressed (e.g., too complex,
 out of scope, disagree):
 
 - Reply explaining why (e.g., "Deferred — this would
   require refactoring the auth module, out of scope for
   this story")
-- End the reply with `— reins`
 
 Do not leave comments without a response.
 
@@ -95,4 +92,3 @@ review before human review.
 - **Respond to every comment** — addressed or not, every PR
   comment gets a reply explaining the outcome.
 - **Run tests** — do not push if linting or tests fail.
-- **Signature** — every PR comment reply ends with `— reins`.

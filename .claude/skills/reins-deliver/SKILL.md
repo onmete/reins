@@ -45,13 +45,14 @@ Follow the `/reins-raise-pr` instructions:
 
 ## Phase 3: Self-Review (Round 1)
 
-Follow the `/reins-review` instructions:
+Follow the `/reins-review` instructions with `--post`
+(skip the posting checkpoint — post directly):
 
 1. Gather evidence (plan, diff, changed files)
 2. Assess adherence and code quality
 3. Verify findings with subagents
-4. Post review comments on the PR
-5. Write local review to `.reins/reviews/{story_id}.md`
+4. Write local review to `.reins/reviews/{story_id}.md`
+5. Post review comments on the PR
 
 If all ACs pass and no quality issues, skip to the end.
 
@@ -81,8 +82,6 @@ Review: {verdict}, score {overall_score}/100
 
 PR is ready for human review.
 For skill improvements: /reins-retro {story_id}
-
-— reins
 ```
 
 ## Constraints
@@ -95,5 +94,3 @@ For skill improvements: /reins-retro {story_id}
   the constraints of its corresponding skill.
 - **Max 2 review rounds** — after round 2, remaining issues
   go to the human reviewer.
-- **Signature** — all PR comments and descriptions end with
-  `— reins`.

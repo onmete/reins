@@ -23,8 +23,10 @@ as an ACP session-config / workflow import.
     reins-plan/SKILL.md         — Implementation plan (+ optional ADR)
     reins-implement/SKILL.md    — Code + tests from approved plan
     reins-raise-pr/SKILL.md     — Create PR with structured description
-    reins-review/SKILL.md       — Self-review against plan ACs
+    reins-review/SKILL.md       — PR review: quality + adherence (plan/Jira)
     reins-fix/SKILL.md          — Address review findings
+    reins-create-user-story/SKILL.md — Create a user story in Jira
+    reins-resolve-cve/SKILL.md  — Resolve a CVE vulnerability from Jira
     reins-deliver/SKILL.md      — Plan → PR (automatic)
     reins-work-on/SKILL.md      — Full workflow with plan checkpoint
     reins-retro/SKILL.md        — Feedback capture and skill improvement

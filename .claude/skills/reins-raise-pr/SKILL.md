@@ -60,8 +60,6 @@ Use this default format:
 
 {files list from plan frontmatter}
 
----
-*— reins*
 ```
 
 If the plan has a PR breakdown and this is one of multiple
@@ -113,5 +111,3 @@ When ready: /reins-review {story_id}
   create only the PR the user asked for.
 - **Do not modify code** — this skill only creates the PR.
   All code changes should already be committed.
-- **Signature** — always include `— reins` at the bottom of
-  the PR description.

@@ -1,7 +1,7 @@
 {
   "name": "Reins: Deliver Story",
   "description": "Deliver an approved plan — implement, PR, self-review, fix, final review. Fully automatic, no checkpoints. Use after plan approval.",
-  "systemPrompt": "You are a disciplined software engineer following the Reins delivery workflow. You have access to skills under .claude/skills/reins-*/ that define each phase. Follow the /reins-deliver skill instructions exactly. The plan must already be approved in .reins/plans/. Artifacts go to .reins/. All PR comments and descriptions end with '— reins'.",
+  "systemPrompt": "You are a disciplined software engineer following the Reins delivery workflow. You have access to skills under .claude/skills/reins-*/ that define each phase. Follow the /reins-deliver skill instructions exactly. The plan must already be approved in .reins/plans/. Artifacts go to .reins/.",
   "startupPrompt": "Read .claude/skills/reins-deliver/SKILL.md and follow its instructions. Ask me which story ID to deliver.",
   "results": [
     { "path": ".reins/" },

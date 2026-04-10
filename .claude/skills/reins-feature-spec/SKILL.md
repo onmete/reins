@@ -22,13 +22,9 @@ feature is, not how to break it down.
 The user provides a feature in one of these forms:
 
 1. **Jira key** — `/reins-feature-spec PROJ-100` (uses
-   `jira-mcp` to fetch the feature)
+   `acli` to fetch the feature)
 2. **Pasted content** — feature description directly in the
    conversation
-
-If using Jira MCP and the `cloudId` is unknown, call
-`getAccessibleAtlassianResources` to discover it, or ask the
-user.
 
 Extract the **feature ID**, **summary**, **description**, and
 any **acceptance criteria** or **linked issues** from whatever
@@ -38,12 +34,13 @@ the user provides.
 
 Gather context from multiple sources:
 
-- **From Jira** — fetch the feature via `getJiraIssue` with
-  `responseContentFormat: "markdown"`. Extract description,
-  acceptance criteria, priority, linked issues (epics, stories,
-  spikes already under this feature).
-- **From Jira search** — use `searchJiraIssuesUsingJql` to
-  find related features, epics, or stories in the same project
+- **From Jira** — fetch the feature via
+  `acli jira workitem view {KEY} --json`. Extract
+  description, acceptance criteria, priority, linked issues
+  (epics, stories, spikes already under this feature).
+- **From Jira search** — use
+  `acli jira workitem search --jql "..." --json` to find
+  related features, epics, or stories in the same project
   that may overlap or conflict.
 - **From the codebase** — read `AGENTS.md`, architecture docs,
   and relevant source files to understand the technical
@@ -137,8 +134,14 @@ lasting consequences. Do not create ADRs for obvious choices.
 
 ## Step 6: Update Jira
 
-Add a comment to the Jira feature via `addCommentToJiraIssue`
-summarizing the spec:
+Add a comment to the Jira feature summarizing the spec:
+
+```bash
+acli jira workitem comment create --key {KEY} \
+  --body "{spec summary, ADR list, open questions}"
+```
+
+Include:
 
 - One-line summary of the feature spec
 - Link or reference to the local spec file

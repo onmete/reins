@@ -17,11 +17,6 @@ All Reins artifacts go under `.reins/` in the workspace root:
 - `.reins/adrs/` — architecture decision records
 - `.reins/reviews/` — self-review reports
 
-## Signature
-
-All PR descriptions, PR comments, and Jira comments created by
-Reins skills must end with `— reins`.
-
 ## Review Limits
 
 Maximum 2 self-review rounds per story. After round 2, remaining

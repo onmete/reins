@@ -14,8 +14,9 @@ Potential improvements to track. Not loaded by agents.
 
 ## reins-decompose
 
-- **Parallel story creation** — if Jira MCP supports batching,
-  create all stories in parallel instead of sequentially.
+- **Parallel story creation** — if `acli` supports batching
+  (e.g. `create-bulk`), create all stories in parallel
+  instead of sequentially.
 - **Auto-assign** — if team member info is available, suggest
   assignments based on component ownership.
 

@@ -28,9 +28,9 @@ touching Jira.
 The feature ID must match a spec file at
 `.reins/feature-specs/{feature_id}.md`.
 
-If using Jira MCP and the `cloudId` is unknown, call
-`getAccessibleAtlassianResources` to discover it, or ask the
-user.
+This skill uses **acli** (Atlassian CLI) for all Jira
+operations. If not authenticated, run `acli auth login`
+first.
 
 ## Step 1: Read Context
 
@@ -40,8 +40,9 @@ user.
   user.
 - **ADRs** — read any `.reins/adrs/{feature_id}-*.md` files
   for architectural decisions that shape the decomposition.
-- **Feature from Jira** — fetch via `getJiraIssue` to get
-  current state, existing children (epics/stories already
+- **Feature from Jira** — fetch via
+  `acli jira workitem view {KEY} --json` to get current
+  state, existing children (epics/stories already
   linked), and any fields not captured in the spec.
 - **Codebase** — read `AGENTS.md` and relevant architecture
   docs to understand component boundaries, service ownership,
@@ -148,24 +149,35 @@ Do NOT proceed to Step 4 without explicit approval.
 
 ## Step 4: Create in Jira
 
-After approval, create issues via `createJiraIssue`:
+After approval, create issues via `acli`:
 
-1. **Create Epics** — under the parent Feature. Use
-   `parent: "{feature_id}"` if the Jira project supports
-   hierarchy, or link them manually.
-2. **Create Stories** — under each Epic. Include:
-   - Summary
-   - Description with acceptance criteria
-   - Parent link to the Epic
-   - Labels as appropriate
+1. **Create Epics** — under the parent Feature:
+
+   ```bash
+   acli jira workitem create \
+     --project OLS --type Epic \
+     --summary "{title}" \
+     --description-file /tmp/epic-desc.md \
+     --parent {feature_id} --json
+   ```
+
+2. **Create Stories** — under each Epic. Include summary,
+   description with acceptance criteria, and parent link:
+
+   ```bash
+   acli jira workitem create \
+     --project OLS --type Story \
+     --summary "{title}" \
+     --description-file /tmp/story-desc.md \
+     --parent {EPIC-KEY} --json
+   ```
+
 3. **Create Spikes** — under the relevant Epic, same as
-   stories but with issue type "Spike" (or "Task" if Spike
-   type is not available — ask the user).
+   stories but with `--type Spike` (or `--type Task` if
+   Spike type is not available — ask the user).
 4. **Add dependency links** — if the Jira project supports
    issue links (blocks/is-blocked-by), add them between
    dependent stories.
-
-Use `contentFormat: "markdown"` for descriptions.
 
 Report each created issue as it's created:
 
@@ -225,8 +237,6 @@ Next steps:
   - For spikes: /reins-spike {SPIKE-KEY}
   - For stories: /reins-story-spec {STORY-KEY}
     or /reins-work-on {STORY-KEY}
-
-— reins
 ```
 
 ## Constraints
@@ -246,5 +256,3 @@ Next steps:
 - **Respect existing work** — if the Feature already has
   Epics or Stories in Jira, acknowledge them. Ask the user
   whether to incorporate, replace, or work alongside them.
-- **Signature** — PR descriptions and Jira comments end with
-  `— reins`.

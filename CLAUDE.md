@@ -23,8 +23,10 @@ automatic.
 | `/reins-plan` | Implementation plan |
 | `/reins-implement` | Code + tests from approved plan |
 | `/reins-raise-pr` | Create PR with structured description |
-| `/reins-review` | Self-review against plan ACs |
+| `/reins-review` | PR review: code quality + adherence (plan/Jira) |
 | `/reins-fix` | Address review findings |
+| `/reins-create-user-story` | Create a user story in Jira |
+| `/reins-resolve-cve` | Resolve a CVE vulnerability from Jira |
 | `/reins-deliver` | Plan → PR (automatic, no checkpoints) |
 | `/reins-work-on` | Full workflow with plan checkpoint |
 | `/reins-retro` | Session retrospective → skill edits |
@@ -43,5 +45,4 @@ All artifacts live under `.reins/` in the workspace root:
 
 - Wrap prose at 78 characters
 - Conventional commits: `type(scope): description`
-- PR comments and Jira comments end with `— reins`
 - Maximum 2 self-review rounds per story

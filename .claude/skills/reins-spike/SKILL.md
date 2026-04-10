@@ -18,22 +18,18 @@ decision record with findings, options, and a recommendation.
 
 The user provides a spike in one of these forms:
 
-1. **Jira key** — `/reins-spike SPIKE-456` (uses `jira-mcp`
+1. **Jira key** — `/reins-spike SPIKE-456` (uses `acli`
    to fetch the spike)
 2. **Pasted content** — spike description with research
    questions directly in the conversation
-
-If using Jira MCP and the `cloudId` is unknown, call
-`getAccessibleAtlassianResources` to discover it, or ask the
-user.
 
 Extract the **spike ID**, **summary**, **research questions**,
 and **time-box** from whatever the user provides.
 
 ## Step 1: Read Spike Context
 
-- **From Jira** — fetch the spike via `getJiraIssue` with
-  `responseContentFormat: "markdown"`. Extract research
+- **From Jira** — fetch the spike via
+  `acli jira workitem view {KEY} --json`. Extract research
   questions from the description. If no clear research
   questions exist, ask the user to define them before
   proceeding.
@@ -149,19 +145,23 @@ affect the blocked stories?
 
 ## Step 5: Update Jira
 
-Add a comment to the spike via `addCommentToJiraIssue`
-summarizing:
+Add a comment to the spike summarizing:
 
-- Key findings per research question
-- Recommendation
-- Link to the ADR file
-- Impact on blocked stories
+```bash
+acli jira workitem comment create --key {KEY} \
+  --body "{summary of findings, recommendation,
+  ADR link, impact on blocked stories}"
+```
 
-If the user confirms the spike is complete, transition it
-to "Done" via `transitionJiraIssue` (after calling
-`getTransitionsForJiraIssue` to find the right transition
-ID). **Ask before transitioning** — the user may want to
-keep it open for further discussion.
+If the user confirms the spike is complete, transition it:
+
+```bash
+acli jira workitem transition \
+  --key {KEY} --status "Done" --yes
+```
+
+**Ask before transitioning** — the user may want to keep
+it open for further discussion.
 
 ## Step 6: Report
 
@@ -178,8 +178,6 @@ Unblocked stories:
 Next steps:
   - /reins-story-spec {STORY-KEY}
   - /reins-work-on {STORY-KEY}
-
-— reins
 ```
 
 ## Constraints
@@ -202,4 +200,3 @@ Next steps:
   a valid outcome.
 - **Human approval for Jira transitions** — ask before
   transitioning the spike status.
-- **Signature** — Jira comments end with `— reins`.
