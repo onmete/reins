@@ -111,6 +111,66 @@ evaluated independently.
 
 Only edit the file after the user confirms each change.
 
+## Step 6: Raise a PR
+
+After all approved edits are applied, ask: "Want me to raise
+a PR with these improvements?"
+
+If the user agrees:
+
+### Locate the reins repo
+
+The retro may be running from any project that symlinks
+reins skills. Edits write through the symlinks, so the
+changes are already in the reins repo's working tree.
+
+Resolve the repo path:
+
+```bash
+readlink -f "$(which_skill_path)" | sed 's|/.claude/skills/.*||'
+```
+
+In practice: find any file you just edited, resolve its
+real path, and walk up to the git root. For example, if you
+edited `~/.cursor/skills/reins-plan/SKILL.md`, resolve the
+symlink to `/home/…/reins/.claude/skills/reins-plan/SKILL.md`
+and the repo root is `/home/…/projects/reins`.
+
+All subsequent git and gh commands run in the reins repo,
+not the current project.
+
+### Branch, commit, push
+
+1. `cd` into the reins repo root
+2. Create a branch: `retro/{short-slug}` (e.g.
+   `retro/plan-add-exploration-step`)
+3. Stage only the changed skill/convention files
+4. Commit with: `fix(skills): {one-line summary of changes}`
+   — if multiple skills were touched, list them in the scope:
+   `fix(plan,implement): …`
+5. Push the branch
+
+### Create the PR
+
+Use `gh pr create` with the `retro-finding` PR template
+(`.github/PULL_REQUEST_TEMPLATE/retro-finding.md`). Fill in
+the template's sections for each applied finding: Target,
+Confidence, Signal, Old Instructions, New Instructions, and
+Reason. Duplicate the finding block if multiple findings
+were applied.
+
+```bash
+gh pr create \
+  --title "fix(skills): {summary}" \
+  --template retro-finding.md
+```
+
+After creation, print:
+
+```
+PR created: {PR URL}
+```
+
 ## What Counts as a Good Edit
 
 - **Specific** — "Check for existing utility modules in
